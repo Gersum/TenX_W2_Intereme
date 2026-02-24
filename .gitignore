@@ -1,4 +1,11 @@
-governance_swarm/.venv/
+.venv/
 **/__pycache__/
 *.pyc
 .DS_Store
+.ruff_cache/
+audit/
+reports/*.html
+reports/*.txt
+
+# Local legacy workspace folder kept outside submitted project tree
+governance_swarm/

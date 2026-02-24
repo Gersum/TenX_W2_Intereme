@@ -19,7 +19,6 @@ Current scope:
 ## Setup (uv)
 
 ```bash
-cd /Users/gersumasfaw/Test/governance_swarm
 uv sync
 cp .env.example .env
 ```
@@ -35,7 +34,7 @@ Set `.env` values as needed:
 Audit a local repo:
 
 ```bash
-uv run auditor --repo /Users/gersumasfaw/Test/governance_swarm --rubric rubric/week2_rubric.json
+uv run auditor --repo . --rubric rubric/week2_rubric.json
 ```
 
 Audit a git URL:

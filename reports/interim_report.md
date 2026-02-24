@@ -1,7 +1,7 @@
 # TRP1 Week 2 Interim Report
 
 **Project:** The Automaton Auditor (Digital Courtroom)  
-**Repository:** `/Users/gersumasfaw/Test/governance_swarm`  
+**Repository:** repository root (`.`)  
 **Date:** 2026-02-24
 
 ## 1) Architecture Decisions Made So Far
@@ -187,4 +187,3 @@ Before final submission, this interim plan will be considered complete when:
 2. Judicial validator + retry behavior is observable in execution traces.
 3. Deterministic synthesis rule table is implemented and tested on disagreement scenarios.
 4. Audit output includes criterion-level judicial evidence and actionable remediation.
-
