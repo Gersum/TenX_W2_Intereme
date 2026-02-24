@@ -1,0 +1,32 @@
+{
+  "name": "FDE Week 2 Digital Courtroom Rubric",
+  "criteria": [
+    {
+      "id": "C1_Orchestration",
+      "description": "Parallel detective and judicial execution with typed state and reducers.",
+      "statute": "Statute of Orchestration",
+      "remediation_templates": [
+        "Use StateGraph with explicit fan-out and fan-in edges.",
+        "Use operator.ior for evidences and operator.add for opinions."
+      ]
+    },
+    {
+      "id": "C2_Engineering",
+      "description": "Technical rigor, deterministic synthesis, and secure tooling.",
+      "statute": "Statute of Engineering",
+      "remediation_templates": [
+        "Strengthen AST-based checks and reduce regex-only checks.",
+        "Encode final scoring rules as deterministic Python logic."
+      ]
+    },
+    {
+      "id": "C3_Effort",
+      "description": "Iteration quality and forensic narrative from git history.",
+      "statute": "Statute of Effort",
+      "remediation_templates": [
+        "Prefer atomic commits and coherent commit messages.",
+        "Map audit findings to commit-level remediation tasks."
+      ]
+    }
+  ]
+}
