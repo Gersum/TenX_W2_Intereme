@@ -67,13 +67,24 @@ Current implementation references:
 
 ---
 
+### 1.4 Conceptual grounding (for DocAnalyst checks)
+
+This interim architecture is intentionally framed around **Dialectical Synthesis**, **Metacognition**, **Fan-In/Fan-Out**, and **State Synchronization**.
+
+- **Dialectical Synthesis:** the planned judicial bench is designed to produce conflicting arguments (Prosecutor vs Defense vs Tech Lead), then resolve them through deterministic synthesis.
+- **Metacognition:** the system evaluates not just generated artifacts but the quality of reasoning used to produce those artifacts.
+- **Fan-In/Fan-Out:** detectives run in parallel fan-out branches, then synchronize at a fan-in aggregation point before downstream reasoning.
+- **State Synchronization:** typed shared state and reducers are used so concurrent node updates do not overwrite evidence.
+
+---
+
 ## 2) Known Gaps and Concrete Plan
 
 ### 2.1 Known gaps (current state)
 
 1. Graph wiring does not yet include an explicit `EvidenceAggregator` fan-in synchronization node before judges.
 2. Conditional edges for failure handling (evidence insufficiency, judge parse failure, retry exhaustion) are not fully wired.
-3. Final submission spec calls for `src/nodes/justice.py`; current synthesis logic lives in `src/nodes/supreme_court.py`.
+3. Final submission spec calls for a dedicated justice-node module; current synthesis logic lives in `src/nodes/supreme_court.py`.
 4. Required helper interfaces are not yet exposed by spec names:
    - `analyze_graph_structure(path: str)`
    - `extract_git_history(path: str)`
@@ -99,7 +110,7 @@ Acceptance criteria:
 - Retries are deterministic and bounded.
 
 #### Phase B: Synthesis engine hardening
-1. Move/finalize deterministic synthesis in `src/nodes/justice.py`.
+1. Move/finalize deterministic synthesis in a dedicated justice-node module.
 2. Encode precedence rules:
    - Fact supremacy (evidence over opinion)
    - Security override (cap total score when confirmed negligence exists)
