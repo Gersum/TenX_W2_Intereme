@@ -27,6 +27,24 @@
         "Prefer atomic commits and coherent commit messages.",
         "Map audit findings to commit-level remediation tasks."
       ]
+    },
+    {
+      "id": "C4_Security",
+      "description": "Identification and mitigation of risky execution patterns and vulnerabilities.",
+      "statute": "Statute of Security",
+      "remediation_templates": [
+        "Remove direct shell execution and use sandboxed subprocess calls.",
+        "Ensure all external inputs are validated before processing."
+      ]
+    },
+    {
+      "id": "C5_Architecture",
+      "description": "Compliance with architecture spec and reporting citation standards.",
+      "statute": "Statute of Engineering",
+      "remediation_templates": [
+        "Ensure all file citations in the PDF exist in the repository.",
+        "Align theoretical grounding with implementation patterns."
+      ]
     }
   ]
 }
