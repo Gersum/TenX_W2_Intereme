@@ -1,0 +1,28 @@
+[project]
+name = "governance-swarm"
+version = "0.1.0"
+description = "Digital Courtroom automaton auditor built with LangGraph."
+requires-python = ">=3.11"
+dependencies = [
+  "langgraph>=0.2.67",
+  "langchain>=0.3.0",
+  "langchain-openai>=0.2.0",
+  "pydantic>=2.8.2",
+  "python-dotenv>=1.0.1",
+  "pypdf>=5.0.1",
+]
+
+[project.scripts]
+auditor = "src.main:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+  "ruff>=0.6.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
