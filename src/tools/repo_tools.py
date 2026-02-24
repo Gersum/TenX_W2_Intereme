@@ -8,12 +8,12 @@ from pathlib import Path
 from ..state import Evidence
 
 
-def _is_url(target: str) -> bool:
+def is_url(target: str) -> bool:
     return target.startswith("http://") or target.startswith("https://") or target.endswith(".git")
 
 
-def _resolve_repo(target: str) -> tuple[Path, tempfile.TemporaryDirectory[str] | None]:
-    if _is_url(target):
+def resolve_repo(target: str) -> tuple[Path, tempfile.TemporaryDirectory[str] | None]:
+    if is_url(target):
         temp_dir = tempfile.TemporaryDirectory()
         repo_path = Path(temp_dir.name) / "repo"
         proc = subprocess.run(
@@ -127,7 +127,7 @@ def _ast_name(node: ast.AST) -> str | None:
 
 def protocol_state_structure(target: str) -> Evidence:
     try:
-        repo_path, temp_dir = _resolve_repo(target)
+        repo_path, temp_dir = resolve_repo(target)
     except Exception as exc:
         return Evidence(
             id="repo.state_structure",
@@ -172,7 +172,7 @@ def protocol_state_structure(target: str) -> Evidence:
 
 def protocol_graph_wiring(target: str) -> Evidence:
     try:
-        repo_path, temp_dir = _resolve_repo(target)
+        repo_path, temp_dir = resolve_repo(target)
     except Exception as exc:
         return Evidence(
             id="repo.graph_wiring",
@@ -217,7 +217,7 @@ def protocol_graph_wiring(target: str) -> Evidence:
 
 def protocol_git_narrative(target: str) -> Evidence:
     try:
-        repo_path, temp_dir = _resolve_repo(target)
+        repo_path, temp_dir = resolve_repo(target)
     except Exception as exc:
         return Evidence(
             id="repo.git_narrative",
@@ -253,7 +253,7 @@ def protocol_git_narrative(target: str) -> Evidence:
 
 def protocol_security_scan(target: str) -> Evidence:
     try:
-        repo_path, temp_dir = _resolve_repo(target)
+        repo_path, temp_dir = resolve_repo(target)
     except Exception as exc:
         return Evidence(
             id="repo.security_scan",

@@ -5,22 +5,28 @@ from pathlib import Path
 from ..state import AgentState, Evidence
 from ..tools.doc_tools import protocol_citation_check, protocol_concept_verification
 from ..tools.repo_tools import (
+    is_url,
     protocol_git_narrative,
     protocol_graph_wiring,
     protocol_security_scan,
     protocol_state_structure,
+    resolve_repo,
 )
 
 
 def _repo_file_inventory(repo_target: str) -> list[str]:
-    path = Path(repo_target)
-    if not path.exists() or not path.is_dir():
+    try:
+        path, temp_dir = resolve_repo(repo_target)
+        inventory = [
+            str(p.relative_to(path))
+            for p in path.rglob("*")
+            if p.is_file()
+        ]
+        if temp_dir:
+            temp_dir.cleanup()
+        return inventory
+    except Exception:
         return []
-    return [
-        str(p.relative_to(path))
-        for p in path.rglob("*")
-        if p.is_file()
-    ]
 
 
 def run_repo_investigator(state: AgentState) -> dict:
