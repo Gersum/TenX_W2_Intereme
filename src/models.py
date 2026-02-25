@@ -10,7 +10,7 @@ class Statute(str, Enum):
     ORCHESTRATION = "Statute of Orchestration"
     ENGINEERING = "Statute of Engineering"
     EFFORT = "Statute of Effort"
-    SECURITY = "Rule of Security"
+    SECURITY = "Statute of Security"
 
 
 class Evidence(BaseModel):

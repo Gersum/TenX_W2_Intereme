@@ -22,7 +22,8 @@ class _OpinionOut(BaseModel):
 
 
 def _criteria(state: AgentState) -> list[dict]:
-    return state["rubric"].get("criteria", [])
+    rubric = state["rubric"]
+    return rubric.get("dimensions") or rubric.get("criteria") or []
 
 
 def _evidence_payload(state: AgentState) -> dict:

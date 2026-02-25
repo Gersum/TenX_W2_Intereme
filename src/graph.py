@@ -10,7 +10,7 @@ from .state import AgentState
 
 
 DEFAULT_RUBRIC = {
-    "criteria": [
+    "dimensions": [
         {
             "id": "C1_Orchestration",
             "statute": "Statute of Orchestration",
