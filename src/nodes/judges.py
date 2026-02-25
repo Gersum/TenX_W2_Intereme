@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import os
+import urllib.error
+import urllib.request
 from difflib import SequenceMatcher
 from typing import Literal
 
@@ -52,34 +54,137 @@ def _heuristic_score(judge: str, criterion: dict, evidence: dict) -> JudicialOpi
     )
 
 
+def _build_llm():
+    provider = os.getenv("LLM_PROVIDER", "auto").lower()
+
+    if provider in {"auto", "ollama"}:
+        ollama_model = os.getenv("OLLAMA_MODEL")
+        if ollama_model:
+            try:
+                from langchain_ollama import ChatOllama
+
+                return ChatOllama(
+                    model=ollama_model,
+                    base_url=os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
+                    temperature=0.1,
+                )
+            except Exception:
+                if provider == "ollama":
+                    return None
+
+    if provider in {"auto", "openai"} and os.getenv("OPENAI_API_KEY"):
+        model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        return ChatOpenAI(model=model, temperature=0.1)
+
+    return None
+
+
+def _maybe_ollama_opinion(
+    judge: Literal["Prosecutor", "Defense", "TechLead"],
+    criterion: dict,
+    evidence: dict,
+) -> _OpinionOut | None:
+    model = os.getenv("OLLAMA_MODEL")
+    if not model:
+        return None
+
+    base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
+    payload = {
+        "model": model,
+        "stream": False,
+        "format": "json",
+        "messages": [
+            {
+                "role": "system",
+                "content": f"You are {judge}. Return strict JSON for legal-style code governance scoring.",
+            },
+            {
+                "role": "user",
+                "content": (
+                    "Criterion:\n"
+                    f"{json.dumps(criterion)}\n\n"
+                    "Evidence:\n"
+                    f"{json.dumps(evidence)}\n\n"
+                    "Statutes: Orchestration, Engineering, Effort, Security.\n"
+                    "Cite only existing evidence ids."
+                ),
+            },
+        ],
+        "options": {"temperature": 0.1},
+    }
+    req = urllib.request.Request(
+        f"{base_url}/api/chat",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            raw = resp.read().decode("utf-8")
+        data = json.loads(raw)
+        content = data.get("message", {}).get("content", "")
+        if not content:
+            return None
+        return _OpinionOut.model_validate_json(content)
+    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, ValueError):
+        return None
+
+
 def _maybe_llm_opinion(judge: Literal["Prosecutor", "Defense", "TechLead"], criterion: dict, evidence: dict) -> JudicialOpinion:
-    api_key = os.getenv("OPENAI_API_KEY")
+    provider = os.getenv("LLM_PROVIDER", "auto").lower()
+
+    if provider in {"auto", "ollama"}:
+        ollama_out = _maybe_ollama_opinion(judge, criterion, evidence)
+        if ollama_out is not None:
+            return JudicialOpinion(
+                judge=judge,
+                criterion_id=ollama_out.criterion_id,
+                statute=ollama_out.statute,
+                score=max(1, min(5, ollama_out.score)),
+                argument=ollama_out.argument,
+                cited_evidence=ollama_out.cited_evidence,
+            )
+        if provider == "ollama":
+            return _heuristic_score(judge, criterion, evidence)
+
+    # Master Thinker tier: prefer DeepSeek for Judicial reasoning
+    api_key = os.getenv("DEEPSEEK_API_KEY") or os.getenv("OPENAI_API_KEY")
     if not api_key:
         return _heuristic_score(judge, criterion, evidence)
 
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    llm = ChatOpenAI(model=model, temperature=0.1)
-    structured = llm.with_structured_output(_OpinionOut)
+    model = os.getenv("OPENAI_MODEL_OVERRIDE", "deepseek-v3.2:cloud")
+    base_url = os.getenv("DEEPSEEK_API_BASE", "https://api.deepseek.com/v1") if "deepseek" in model else None
 
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", "You are {judge}. Return strict JSON for legal-style code governance scoring."),
-            (
-                "human",
-                "Criterion:\n{criterion}\n\nEvidence:\n{evidence}\n\n"
-                "Statutes: Orchestration, Engineering, Effort, Security.\n"
-                "Cite only existing evidence ids.",
-            ),
-        ]
+    llm = ChatOpenAI(
+        model=model,
+        api_key=api_key,
+        base_url=base_url,
+        temperature=0.1,
     )
-    chain = prompt | structured
-    out = chain.invoke(
-        {
-            "judge": judge,
-            "criterion": json.dumps(criterion),
-            "evidence": json.dumps(evidence),
-        }
-    )
+    try:
+        structured = llm.with_structured_output(_OpinionOut)
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", "You are {judge}. Return strict JSON for legal-style code governance scoring."),
+                (
+                    "human",
+                    "Criterion:\n{criterion}\n\nEvidence:\n{evidence}\n\n"
+                    "Statutes: Orchestration, Engineering, Effort, Security.\n"
+                    "Cite only existing evidence ids.",
+                ),
+            ]
+        )
+        chain = prompt | structured
+        out = chain.invoke(
+            {
+                "judge": judge,
+                "criterion": json.dumps(criterion),
+                "evidence": json.dumps(evidence),
+            }
+        )
+    except Exception:
+        return _heuristic_score(judge, criterion, evidence)
+
     return JudicialOpinion(
         judge=judge,
         criterion_id=out.criterion_id,
@@ -135,4 +240,3 @@ def detect_persona_collusion(state: AgentState) -> dict:
         ]
         return {"opinions": capped, "logs": [f"Persona collusion detected (max_similarity={max_sim:.2f}); scores capped"]}
     return {"logs": [f"No persona collusion (max_similarity={max_sim:.2f})"]}
-

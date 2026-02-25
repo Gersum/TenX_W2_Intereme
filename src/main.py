@@ -32,6 +32,7 @@ def main() -> None:
         "evidences": {},
         "opinions": [],
         "logs": [],
+        "final_verdict": None,
     }
     result = app.invoke(initial_state)
     evidences = result.get("evidences", {})
@@ -40,20 +41,24 @@ def main() -> None:
     render_detective_report(args.repo, args.report, evidences, logs, args.out)
     out_json = Path(args.out_json)
     out_json.parent.mkdir(parents=True, exist_ok=True)
-    out_json.write_text(
-        json.dumps(
-            {
-                "repo_url": args.repo,
-                "pdf_path": args.report,
-                "evidences": {k: v.model_dump() for k, v in evidences.items()},
-                "logs": logs,
-            },
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
+    final_verdict = result.get("final_verdict")
+    json_data = {
+        "repo_url": args.repo,
+        "pdf_path": args.report,
+        "evidences": {k: v.model_dump() for k, v in evidences.items()},
+        "logs": logs,
+    }
+    if final_verdict:
+        json_data["final_verdict"] = final_verdict.model_dump()
+
+    out_json.write_text(json.dumps(json_data, indent=2), encoding="utf-8")
     print(f"Report written to {args.out}")
     print(f"JSON written to {args.out_json}")
+    if final_verdict:
+        print("\n--- CHIEF JUSTICE FINAL VERDICT ---")
+        print(f"Total Score: {final_verdict.total_score} / 5.0")
+        print(f"Summary: {final_verdict.executive_summary}")
+        print("-----------------------------------")
 
 
 if __name__ == "__main__":

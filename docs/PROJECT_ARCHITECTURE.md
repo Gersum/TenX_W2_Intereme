@@ -17,7 +17,19 @@ At interim stage, the implementation is intentionally scoped to the **Detective 
 - synchronize evidence in a fan-in node
 - output an auditable interim report
 
-The judicial and synthesis layers are present in code modules but not wired into the interim runtime graph.
+## Master Thinker Architecture: Brain vs Tools
+
+The system adheres to a strict division of labor to maximize speed, cost-efficiency, and reasoning depth without hallucination:
+
+1. **🔨 Forensics (The Detectives)**: *Zero LLMs used.*
+   - We use Python AST (Abstract Syntax Trees) and generic Subprocess/Regex tooling for the `RepoInvestigator` and `DocAnalyst`. 
+   - This prevents hallucination: the system either finds the code structure/evidence or it doesn't. Hard facts only.
+2. **⚖️ The Judicial Layer (The Brain)**: *DeepSeek V3 (`deepseek-chat`)*
+   - We save "AI Brain Power" for the Prosecutor, Defense, and Tech Lead roles. DeepSeek V3 excels at nuanced Dialectical Synthesis over the hard evidence facts.
+3. **👁️ Vision**: *Gemini 2.5 Pro*
+   - Used specifically by the `VisionInspector` for diagram analysis.
+
+The judicial and synthesis layers are present in code modules but not wired into the core interim runtime graph.
 
 ---
 

@@ -25,8 +25,12 @@ cp .env.example .env
 
 Set `.env` values as needed:
 
-- `OPENAI_API_KEY` (optional for future judicial layer work)
-- `OPENAI_MODEL`
+- `LLM_PROVIDER` (`auto`, `openai`, or `ollama`; defaults to `auto`)
+- `OLLAMA_MODEL` (for local Ollama, e.g. `deepseek-r1:8b`)
+- `OLLAMA_BASE_URL` (defaults to `http://localhost:11434`)
+- `OPENAI_API_KEY` + `OPENAI_MODEL` (used when provider is `openai` or `auto` with key present)
+- `DEEPSEEK_API_KEY`, `DEEPSEEK_API_BASE`, `OPENAI_MODEL_OVERRIDE` (optional legacy cloud config)
+- `GEMINI_API_KEY` (for future VisionInspector node)
 - `LANGCHAIN_TRACING_V2`, `LANGCHAIN_API_KEY`, `LANGCHAIN_PROJECT` for LangSmith
 
 ## Run
@@ -41,6 +45,15 @@ Audit a git URL:
 
 ```bash
 uv run auditor --repo https://github.com/org/repo.git --report /path/to/report.pdf --rubric rubric/week2_rubric.json
+```
+
+Use local Ollama for judge LLMs (future judicial graph stage):
+
+```bash
+ollama pull deepseek-r1:8b
+export LLM_PROVIDER=ollama
+export OLLAMA_MODEL=deepseek-r1:8b
+uv run auditor --repo . --report reports/interim_report.pdf --rubric rubric/week2_rubric.json
 ```
 
 Outputs:

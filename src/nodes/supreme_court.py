@@ -23,7 +23,9 @@ def chief_justice_node(state: AgentState) -> dict:
     dissent_log: list[str] = []
     score_accumulator: list[int] = []
 
-    for criterion in state["rubric"].get("criteria", []):
+    rubric = state["rubric"]
+    criteria_list = rubric.get("dimensions") or rubric.get("criteria") or []
+    for criterion in criteria_list:
         cid = criterion["id"]
         ops = opinions_by_criterion.get(cid, [])
         if not ops:
@@ -72,15 +74,17 @@ def chief_justice_node(state: AgentState) -> dict:
     if _security_cap_triggered(state):
         final_score = min(final_score, 3.0)
 
-    verdict = FinalVerdict(
-        total_score=round(final_score, 2),
-        executive_summary=(
+    final_score = max(1.0, final_score)
+    verdict_data = {
+        "total_score": round(final_score, 2),
+        "executive_summary": (
             "Deterministic synthesis complete. Fact supremacy enforced; "
             "security risks cap maximum score to 3.0."
         ),
-        criteria=criteria_verdicts,
-        evidence_index=list(state["evidences"].values()),
-        dissent_log=dissent_log,
-    )
+        "criteria": [c.model_dump() for c in criteria_verdicts],
+        "evidence_index": [e.model_dump() if hasattr(e, "model_dump") else e for e in state["evidences"].values()],
+        "dissent_log": dissent_log,
+    }
+    verdict = FinalVerdict.model_validate(verdict_data)
     return {"final_verdict": verdict, "logs": ["Chief Justice completed"]}
 

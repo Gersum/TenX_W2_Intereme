@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import operator
-from typing import Annotated, Literal, TypedDict
+from typing import Annotated, Literal, TypedDict, Any
 
 from pydantic import BaseModel, Field
 
@@ -32,3 +32,5 @@ class AgentState(TypedDict):
     evidences: Annotated[dict[str, Evidence], operator.ior]
     opinions: Annotated[list[JudicialOpinion], operator.add]
     logs: Annotated[list[str], operator.add]
+    final_verdict: Any
+

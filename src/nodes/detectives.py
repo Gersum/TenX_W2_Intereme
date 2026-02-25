@@ -1,11 +1,8 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 from ..state import AgentState, Evidence
 from ..tools.doc_tools import protocol_citation_check, protocol_concept_verification
 from ..tools.repo_tools import (
-    is_url,
     protocol_git_narrative,
     protocol_graph_wiring,
     protocol_security_scan,
@@ -52,16 +49,34 @@ def run_doc_analyst(state: AgentState) -> dict:
     }
 
 
+def run_doc_skipped(state: AgentState) -> dict:
+    return {
+        "logs": [
+            "DocAnalyst skipped: no PDF report path provided; continuing with repository-only evidence."
+        ]
+    }
+
+
 def run_evidence_aggregator(state: AgentState) -> dict:
     evidence_count = len(state["evidences"])
     has_repo = any(ev_id.startswith("repo.") for ev_id in state["evidences"])
     has_doc = any(ev_id.startswith("doc.") for ev_id in state["evidences"])
-    status = "ready" if (has_repo and has_doc) else "incomplete"
+    doc_required = bool(state.get("pdf_path"))
+    status = "ready" if (has_repo and (has_doc or not doc_required)) else "incomplete"
     return {
         "logs": [
             (
                 f"EvidenceAggregator completed: evidence_count={evidence_count}, "
-                f"repo_evidence={has_repo}, doc_evidence={has_doc}, status={status}"
+                f"repo_evidence={has_repo}, doc_evidence={has_doc}, doc_required={doc_required}, status={status}"
             )
+        ]
+    }
+
+
+def run_missing_artifacts_handler(state: AgentState) -> dict:
+    return {
+        "logs": [
+            "MissingArtifactsHandler: required detective evidence was incomplete; "
+            "continuing with partial output for graceful degradation."
         ]
     }

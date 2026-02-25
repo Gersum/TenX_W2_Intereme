@@ -42,6 +42,7 @@ def analyze_graph_structure(path: str) -> dict[str, object]:
     if not graph_file.exists():
         return {
             "exists": False,
+            "edge_calls": 0,
             "add_edge_calls": 0,
             "fan_out_sources": [],
             "fan_in_targets": [],
@@ -51,16 +52,33 @@ def analyze_graph_structure(path: str) -> dict[str, object]:
     tree = ast.parse(graph_file.read_text(encoding="utf-8"))
     edges: list[tuple[str, str]] = []
     for node in ast.walk(tree):
-        if (
+        if not (
             isinstance(node, ast.Call)
             and isinstance(node.func, ast.Attribute)
-            and node.func.attr == "add_edge"
             and len(node.args) >= 2
         ):
+            continue
+
+        if node.func.attr == "add_edge":
             src = _ast_name(node.args[0])
             dst = _ast_name(node.args[1])
             if src and dst:
                 edges.append((src, dst))
+            continue
+
+        if node.func.attr == "add_conditional_edges":
+            src = _ast_name(node.args[0])
+            if not src:
+                continue
+
+            # Conditional routes may omit explicit path_map; conservatively treat as fan-out.
+            if len(node.args) >= 3 and isinstance(node.args[2], ast.Dict):
+                for key in node.args[2].keys:
+                    dst = _ast_name(key)
+                    if dst:
+                        edges.append((src, dst))
+            else:
+                edges.append((src, "__conditional__"))
 
     source_counts: dict[str, int] = {}
     target_counts: dict[str, int] = {}
@@ -72,6 +90,7 @@ def analyze_graph_structure(path: str) -> dict[str, object]:
     fan_in = sorted(k for k, v in target_counts.items() if v > 1)
     return {
         "exists": True,
+        "edge_calls": len(edges),
         "add_edge_calls": len(edges),
         "fan_out_sources": fan_out,
         "fan_in_targets": fan_in,
@@ -196,17 +215,17 @@ def protocol_graph_wiring(target: str) -> Evidence:
                 tags=["orchestration", "parallelism"],
             )
 
-        add_edge_calls = int(analysis["add_edge_calls"])
+        edge_calls = int(analysis["edge_calls"])
         fan_out = analysis.get("fan_out_sources", [])
         fan_in = analysis.get("fan_in_targets", [])
-        found = add_edge_calls >= 4 and bool(fan_out) and bool(fan_in)
+        found = edge_calls >= 4 and bool(fan_out) and bool(fan_in)
         return Evidence(
             id="repo.graph_wiring",
             goal="Verify fan-out/fan-in graph topology.",
             found=found,
             content=str(analysis["summary"]),
             location=str(repo_path / "src/graph.py"),
-            rationale="AST traversal inspected add_edge wiring and fan-out/fan-in signals.",
+            rationale="AST traversal inspected edge and conditional-edge wiring with fan-out/fan-in signals.",
             confidence=0.85 if found else 0.8,
             tags=["orchestration", "parallelism"],
         )
