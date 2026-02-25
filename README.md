@@ -19,7 +19,7 @@ Current scope:
 ## Setup (uv)
 
 ```bash
-uv sync
+uv sync --frozen
 cp .env.example .env
 ```
 
@@ -61,8 +61,18 @@ Outputs:
 - Markdown report: `audit/interim_detective_report.md`
 - JSON report: `audit/interim_detective_report.json`
 
+## Automation and CI
+
+- `Makefile` commands:
+  - `make setup` -> install dependencies from `uv.lock`
+  - `make check` -> lint + compile checks
+  - `make audit` -> local smoke run of detective workflow
+- GitHub Actions CI:
+  - Workflow file: `.github/workflows/ci.yml`
+  - Runs `uv sync --frozen`, lint, compile check, and a smoke audit on every push/PR.
+
 ## Notes
 
 - Repository access is sandboxed via temporary clone directories for URL targets.
-- The interim graph intentionally stops at evidence aggregation (judges are not wired yet).
+- `uv.lock` is committed for exact dependency pinning and reproducible installs.
 - `reports/interim_report.pdf` is included for peer-accessible architecture context.
