@@ -59,8 +59,14 @@ def run_doc_skipped(state: AgentState) -> dict:
 
 def run_evidence_aggregator(state: AgentState) -> dict:
     evidence_count = len(state["evidences"])
-    has_repo = any(ev_id.startswith("repo.") for ev_id in state["evidences"])
-    has_doc = any(ev_id.startswith("doc.") for ev_id in state["evidences"])
+    has_repo = any(
+        ev_id.startswith("repo.") and ev.found
+        for ev_id, ev in state["evidences"].items()
+    )
+    has_doc = any(
+        ev_id.startswith("doc.") and ev.found
+        for ev_id, ev in state["evidences"].items()
+    )
     doc_required = bool(state.get("pdf_path"))
     status = "ready" if (has_repo and (has_doc or not doc_required)) else "incomplete"
     return {

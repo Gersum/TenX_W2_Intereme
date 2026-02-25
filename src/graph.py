@@ -64,8 +64,14 @@ def _route_doc_branch(state: AgentState) -> Literal["doc_analyst", "doc_skipped"
 def _route_post_aggregation(
     state: AgentState,
 ) -> list[Literal["prosecutor", "defense", "tech_lead"]] | Literal["missing_artifacts_handler"]:
-    has_repo = any(ev_id.startswith("repo.") for ev_id in state["evidences"])
-    has_doc = any(ev_id.startswith("doc.") for ev_id in state["evidences"])
+    has_repo = any(
+        ev_id.startswith("repo.") and ev.found
+        for ev_id, ev in state["evidences"].items()
+    )
+    has_doc = any(
+        ev_id.startswith("doc.") and ev.found
+        for ev_id, ev in state["evidences"].items()
+    )
     doc_required = bool(state.get("pdf_path"))
     if has_repo and (has_doc or not doc_required):
         return ["prosecutor", "defense", "tech_lead"]
