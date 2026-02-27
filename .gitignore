@@ -1,9 +1,16 @@
 .venv/
+.env
 **/__pycache__/
 *.pyc
 .DS_Store
 .ruff_cache/
-audit/
+audit/*
+!audit/report_onself_generated/
+!audit/report_onself_generated/**
+!audit/report_onpeer_generated/
+!audit/report_onpeer_generated/**
+!audit/report_bypeer_received/
+!audit/report_bypeer_received/**
 reports/*.html
 reports/*.txt
 

@@ -1,78 +1,111 @@
-# Automaton Auditor (Digital Courtroom)
+# Automaton Auditor - Final Submission
 
-Week 2 interim implementation of a LangGraph-based detective swarm focused on forensic evidence collection.
+Digital Courtroom governance swarm for auditing a target Week 2 repository and report PDF.
 
-Current scope:
+## What This Project Does
 
-- RepoInvestigator (repository forensics)
-- DocAnalyst (PDF/report forensics)
-- EvidenceAggregator fan-in synchronization node
+Input:
+- Target repository URL or local path
+- Architectural PDF report
+- Rubric JSON
 
-## Architecture
+Process:
+- Detectives run in parallel and produce structured `Evidence`
+- Judges run in parallel and produce structured `JudicialOpinion`
+- Chief Justice applies deterministic conflict-resolution rules and emits an `AuditReport`
 
-- `src/state.py`: Pydantic/TypedDict definitions for `Evidence`, `JudicialOpinion`, and `AgentState` with reducers.
-- `src/tools/repo_tools.py`: Sandboxed `git clone`, git history extraction, AST-based graph analysis.
-- `src/tools/doc_tools.py`: PDF ingestion and chunked querying (RAG-lite).
-- `src/nodes/detectives.py`: LangGraph nodes for RepoInvestigator + DocAnalyst + EvidenceAggregator.
-- `src/graph.py`: Partial StateGraph wiring detectives in parallel (fan-out) then fan-in aggregator.
+Output:
+- Final markdown audit report (`final_report` in graph state)
+- JSON serialization of evidence, opinions, and report
 
-## Setup (uv)
+## Final Architecture
+
+Core flow:
+- `START -> [RepoInvestigator || OrchestrationPrecheck || VisionInspector]`
+- `OrchestrationPrecheck -> [DocAnalyst | DocSkipped]`
+- `Detective fan-in -> EvidenceAggregator -> OrchestrationPostcheck`
+- `OrchestrationPostcheck -> [Prosecutor || Defense || TechLead]` or `MissingArtifactsHandler`
+- `Judge fan-in -> ChiefJustice -> END`
+
+Key files:
+- `src/state.py` - finalized typed state + reducers
+- `src/tools/repo_tools.py` - sandboxed clone + AST graph forensics + safety scan
+- `src/tools/doc_tools.py` - PDF parsing, chunked retrieval, cross-reference, vision audit
+- `src/nodes/detectives.py` - RepoInvestigator, DocAnalyst, VisionInspector, aggregator
+- `src/nodes/judges.py` - persona judges with structured outputs
+- `src/nodes/justice.py` - deterministic Chief Justice synthesis rules
+- `src/graph.py` - full LangGraph wiring with parallel fan-out/fan-in and conditional routing
+
+## Deterministic Justice Rules
+
+Implemented in `src/nodes/justice.py`:
+- `security_override`: confirmed security risk caps scoring
+- `fact_supremacy`: unsupported defense claims are overruled by evidence facts
+- `functionality_weight`: architecture-oriented criteria weight Tech Lead opinion
+- `variance_re_evaluation`: high score variance triggers deterministic re-check logic
+- `dissent_requirement`: explicit dissent summary is recorded per criterion
+
+## Setup
 
 ```bash
 uv sync --frozen
 cp .env.example .env
 ```
 
-Set `.env` values as needed:
+## Environment Variables
 
-- `LLM_PROVIDER` (`auto`, `openai`, or `ollama`; defaults to `auto`)
-- `OLLAMA_MODEL` (for local Ollama, e.g. `deepseek-r1:8b`)
-- `OLLAMA_BASE_URL` (defaults to `http://localhost:11434`)
-- `OPENAI_API_KEY` + `OPENAI_MODEL` (used when provider is `openai` or `auto` with key present)
-- `DEEPSEEK_API_KEY`, `DEEPSEEK_API_BASE`, `OPENAI_MODEL_OVERRIDE` (optional legacy cloud config)
-- `GEMINI_API_KEY` (for future VisionInspector node)
-- `LANGCHAIN_TRACING_V2`, `LANGCHAIN_API_KEY`, `LANGCHAIN_PROJECT` for LangSmith
+Required or commonly used variables:
+- `LLM_PROVIDER=auto|ollama|grok|openai|gemini`
+- `OLLAMA_BASE_URL` (default `http://localhost:11434`)
+- `OLLAMA_MODEL` (default `llama3:8b`)
+- `GROK_API_KEY`, `GROK_BASE_URL`, `GROK_MODEL`
+- `OPENAI_API_KEY`, `OPENAI_MODEL`
+- `DEEPSEEK_API_KEY`, `DEEPSEEK_API_BASE`, `OPENAI_MODEL_OVERRIDE`
+- `GEMINI_API_KEY`, `GEMINI_MODEL` (used by VisionInspector image validation)
+- `LANGCHAIN_TRACING_V2`, `LANGCHAIN_API_KEY`, `LANGCHAIN_PROJECT`
 
 ## Run
 
-Audit a local repo:
-
+Self-audit (final report paths):
 ```bash
-uv run auditor --repo . --rubric rubric/week2_rubric.json
+uv run auditor \
+  --repo . \
+  --report reports/final_report.pdf \
+  --rubric rubric/week2_rubric.json \
+  --out audit/report_onself_generated/final_report.md \
+  --out-json audit/report_onself_generated/final_report.json
 ```
 
-Audit a git URL:
-
+Peer-audit:
 ```bash
-uv run auditor --repo https://github.com/org/repo.git --report /path/to/report.pdf --rubric rubric/week2_rubric.json
+uv run auditor \
+  --repo https://github.com/<peer>/<repo>.git \
+  --report /absolute/path/to/peer_report.pdf \
+  --rubric rubric/week2_rubric.json \
+  --out audit/report_onpeer_generated/final_report.md \
+  --out-json audit/report_onpeer_generated/final_report.json
 ```
 
-Use local Ollama for judge LLMs (future judicial graph stage):
+## Required Audit Artifacts
 
+- `audit/report_onself_generated/` - self-generated markdown report
+- `audit/report_onpeer_generated/` - report generated on assigned peer repository
+- `audit/report_bypeer_received/` - markdown report received from peer's agent
+- `reports/final_report.pdf` - final architecture report PDF for peer auditing
+
+## Reproducibility
+
+- Locked dependencies: `uv.lock`
+- Automation helpers: `Makefile`
+- CI checks: `.github/workflows/ci.yml` (`uv sync --frozen`, lint, compile, smoke run)
+
+## LangSmith Trace
+
+Set:
 ```bash
-ollama pull deepseek-r1:8b
-export LLM_PROVIDER=ollama
-export OLLAMA_MODEL=deepseek-r1:8b
-uv run auditor --repo . --report reports/interim_report.pdf --rubric rubric/week2_rubric.json
+export LANGCHAIN_TRACING_V2=true
+export LANGCHAIN_API_KEY=<your_key>
+export LANGCHAIN_PROJECT=automaton-auditor
 ```
 
-Outputs:
-
-- Markdown report: `audit/interim_detective_report.md`
-- JSON report: `audit/interim_detective_report.json`
-
-## Automation and CI
-
-- `Makefile` commands:
-  - `make setup` -> install dependencies from `uv.lock`
-  - `make check` -> lint + compile checks
-  - `make audit` -> local smoke run of detective workflow
-- GitHub Actions CI:
-  - Workflow file: `.github/workflows/ci.yml`
-  - Runs `uv sync --frozen`, lint, compile check, and a smoke audit on every push/PR.
-
-## Notes
-
-- Repository access is sandboxed via temporary clone directories for URL targets.
-- `uv.lock` is committed for exact dependency pinning and reproducible installs.
-- `reports/interim_report.pdf` is included for peer-accessible architecture context.
+Then run the auditor and share the resulting trace URL in your submission.
