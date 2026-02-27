@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import base64
+import os
 import re
 from pathlib import Path
 
+from langchain_core.messages import HumanMessage
+from pydantic import BaseModel
 from pypdf import PdfReader
 
 from ..state import Evidence
@@ -121,3 +125,116 @@ def protocol_concept_verification(report_path: str | None) -> Evidence:
             confidence=0.7,
             tags=["docs", "concept"],
         )
+
+
+class _VisionOut(BaseModel):
+    architectural_match: bool
+    rationale: str
+
+
+def protocol_visual_audit(report_path: str | None) -> Evidence:
+    if not report_path or not Path(report_path).exists():
+        return Evidence(
+            id="doc.visual_audit",
+            goal="Verify architectural diagrams in the report using Vision AI.",
+            found=False,
+            location=report_path or "N/A",
+            rationale="No readable report supplied.",
+            confidence=1.0,
+            tags=["docs", "vision"],
+        )
+
+    try:
+        import fitz
+        doc = fitz.open(report_path)
+        b64_images = []
+        # Max scale for clarity, but cap it to avoid huge payloads
+        for i in range(len(doc)):
+            page = doc.load_page(i)
+            pix = page.get_pixmap(dpi=150)
+            b64_images.append(base64.b64encode(pix.tobytes("png")).decode("utf-8"))
+    except Exception as e:
+        return Evidence(
+            id="doc.visual_audit",
+            goal="Verify architectural diagrams in the report using Vision AI.",
+            found=False,
+            location=report_path,
+            rationale=f"Failed to extract images from PDF: {e}",
+            confidence=1.0,
+            tags=["docs", "vision"],
+        )
+
+    if not b64_images:
+        return Evidence(
+            id="doc.visual_audit",
+            goal="Verify architectural diagrams in the report using Vision AI.",
+            found=False,
+            location=report_path,
+            rationale="No images extracted from the PDF to audit.",
+            confidence=1.0,
+            tags=["docs", "vision"],
+        )
+
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return Evidence(
+            id="doc.visual_audit",
+            goal="Verify architectural diagrams in the report using Vision AI.",
+            found=False,
+            location=report_path,
+            rationale="GEMINI_API_KEY not configured. Vision skipped.",
+            confidence=1.0,
+            tags=["docs", "vision"],
+        )
+
+    try:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        llm = ChatGoogleGenerativeAI(
+            model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
+            api_key=api_key,
+            temperature=0.0,
+        )
+        structured = llm.with_structured_output(_VisionOut)
+
+        content: list[dict[str, object]] = [
+            {
+                "type": "text", 
+                "text": "Review these images from a system architecture report. Do they depict a parallel execution graph with fan-out (detectives) and fan-in (aggregation)? Respond based on visual evidence."
+            }
+        ]
+        
+        # Limit to first 3 images to conserve tokens and prevent payload bloat
+        for b64 in b64_images[:3]:
+            content.append({
+                "type": "image_url",
+                "image_url": {"url": f"data:image/jpeg;base64,{b64}"}
+            })
+
+        message = HumanMessage(content=content)
+        out = structured.invoke([message])
+
+        # Type guard against untyped invoke returns
+        if not isinstance(out, _VisionOut):
+            raise TypeError("LLM did not return structured _VisionOut")
+
+        return Evidence(
+            id="doc.visual_audit",
+            goal="Verify architectural diagrams in the report using Vision AI.",
+            found=out.architectural_match,
+            content=f"images_scanned={len(b64_images)}",
+            location=report_path,
+            rationale=out.rationale,
+            confidence=0.9,
+            tags=["docs", "vision"],
+        )
+    except Exception as e:
+        return Evidence(
+            id="doc.visual_audit",
+            goal="Verify architectural diagrams in the report using Vision AI.",
+            found=False,
+            location=report_path,
+            rationale=f"Vision API error: {str(e)}",
+            confidence=1.0,
+            tags=["docs", "vision"],
+        )
+

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from ..state import AgentState, Evidence
-from ..tools.doc_tools import protocol_citation_check, protocol_concept_verification
+from ..tools.doc_tools import protocol_citation_check, protocol_concept_verification, protocol_visual_audit
 from ..tools.repo_tools import (
     protocol_git_narrative,
     protocol_graph_wiring,
@@ -54,6 +54,14 @@ def run_doc_skipped(state: AgentState) -> dict:
         "logs": [
             "DocAnalyst skipped: no PDF report path provided; continuing with repository-only evidence."
         ]
+    }
+
+
+def run_vision_inspector(state: AgentState) -> dict:
+    vision_evidence = protocol_visual_audit(state.get("pdf_path"))
+    return {
+        "evidences": {vision_evidence.id: vision_evidence},
+        "logs": ["VisionInspector completed"],
     }
 
 

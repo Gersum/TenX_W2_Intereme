@@ -15,37 +15,40 @@ class Statute(str, Enum):
 
 class Evidence(BaseModel):
     id: str = Field(description="Stable evidence identifier.")
-    goal: str = Field(description="The forensic objective.")
-    found: bool = Field(description="Existence of the artifact.")
-    content: str | None = Field(default=None, description="Optional evidence payload.")
-    location: str = Field(description="File path or commit hash.")
-    rationale: str = Field(description="Justification for confidence level.")
-    confidence: float = Field(description="0.0 to 1.0 score of fact certainty.", ge=0.0, le=1.0)
-    tags: list[str] = Field(default_factory=list, description="Classification tags.")
+    goal: str = Field(description="Forensic objective for this check.")
+    found: bool = Field(description="Whether the expected artifact or pattern was found.")
+    content: str | None = Field(default=None, description="Optional structured or text payload.")
+    location: str = Field(description="File path, commit hash, or source location.")
+    rationale: str = Field(description="Why this evidence is considered reliable.")
+    confidence: float = Field(ge=0.0, le=1.0, description="Confidence score in [0, 1].")
+    tags: list[str] = Field(default_factory=list, description="Evidence classification tags.")
 
 
 class JudicialOpinion(BaseModel):
     judge: Literal["Prosecutor", "Defense", "TechLead"]
     criterion_id: str
-    statute: Statute
+    statute: Statute = Field(default=Statute.ENGINEERING)
     score: int = Field(ge=1, le=5)
     argument: str
     cited_evidence: list[str] = Field(default_factory=list)
 
 
-class CriterionVerdict(BaseModel):
+class CriterionBreakdown(BaseModel):
     criterion_id: str
-    score: int = Field(ge=1, le=5)
-    rationale: str
-    dissent: str
+    criterion_name: str
+    statute: Statute
+    final_score: int = Field(ge=1, le=5)
+    judge_opinions: list[JudicialOpinion] = Field(default_factory=list)
+    dissent_summary: str
+    final_rationale: str
     violated_rules: list[str] = Field(default_factory=list)
     remediation: list[str] = Field(default_factory=list)
 
 
-class FinalVerdict(BaseModel):
-    total_score: float = Field(ge=1.0, le=5.0)
+class AuditReport(BaseModel):
     executive_summary: str
-    criteria: list[CriterionVerdict]
+    aggregate_score: float = Field(ge=1.0, le=5.0)
+    criterion_breakdown: list[CriterionBreakdown] = Field(default_factory=list)
+    remediation_plan: dict[str, list[str]] = Field(default_factory=dict)
     evidence_index: list[Evidence] = Field(default_factory=list)
     dissent_log: list[str] = Field(default_factory=list)
-
