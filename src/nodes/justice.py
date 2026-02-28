@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import datetime, timezone
 
 from ..models import AuditReport, CriterionBreakdown, JudicialOpinion, Statute
 from ..reporting import render_audit_report_markdown
@@ -185,6 +186,8 @@ def chief_justice_node(state: AgentState) -> dict:
         summary_parts.append("Rule of Security triggered: aggregate score capped at 3.0.")
 
     report = AuditReport(
+        repo_target=state["repo_url"],
+        generated_at=datetime.now(timezone.utc).isoformat(),
         executive_summary=" ".join(summary_parts),
         aggregate_score=aggregate_score,
         criterion_breakdown=breakdown,

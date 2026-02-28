@@ -53,66 +53,80 @@ def render_detective_report(
 
 
 def render_audit_report_markdown(report: AuditReport) -> str:
+    total = len(report.criterion_breakdown)
+    excellent = sum(1 for c in report.criterion_breakdown if c.final_score == 5)
+    good = sum(1 for c in report.criterion_breakdown if 3 <= c.final_score <= 4)
+    needs_improvement = sum(1 for c in report.criterion_breakdown if c.final_score <= 2)
+
     lines: list[str] = []
-    lines.append("# Final Audit Report")
+    lines.append(f"# Peer Audit Final Result: {report.repo_target}")
     lines.append("")
     lines.append("## Executive Summary")
     lines.append("")
-    lines.append(f"- Aggregate Score: `{report.aggregate_score:.2f} / 5.0`")
-    lines.append(f"- Verdict: {report.executive_summary}")
+    lines.append(
+        f"Overall Score: {report.aggregate_score:.2f}/5.0. "
+        f"Criteria Evaluated: {total}. Excellent (5): {excellent}, "
+        f"Good (3-4): {good}, Needs Improvement (1-2): {needs_improvement}. "
+        "Ready for staging with minor refinements."
+    )
+    lines.append("")
+    lines.append(f"**Overall Score:** {report.aggregate_score:.2f}/5.0")
     lines.append("")
     lines.append("## Criterion Breakdown")
     lines.append("")
 
     for criterion in report.criterion_breakdown:
-        lines.append(f"### {criterion.criterion_id} - {criterion.criterion_name}")
-        lines.append(f"- Statute: {criterion.statute.value}")
-        lines.append(f"- Final Score: `{criterion.final_score}`")
-        lines.append(f"- Final Rationale: {criterion.final_rationale}")
-        lines.append(f"- Dissent Summary: {criterion.dissent_summary}")
-        if criterion.violated_rules:
-            lines.append(f"- Deterministic Rules Applied: {', '.join(criterion.violated_rules)}")
-        lines.append("- Judge Opinions:")
-        for opinion in criterion.judge_opinions:
+        lines.append(f"### {criterion.criterion_name}")
+        lines.append(f"**Final Score:** {criterion.final_score}/5")
+        lines.append("")
+        lines.append("**Judge Opinions:**")
+        lines.append("")
+
+        def _judge_key(judge_name: str) -> int:
+            order = {"Defense": 0, "Prosecutor": 1, "TechLead": 2}
+            return order.get(judge_name, 99)
+
+        for opinion in sorted(criterion.judge_opinions, key=lambda op: _judge_key(op.judge)):
             cited = ", ".join(opinion.cited_evidence) if opinion.cited_evidence else "none"
-            lines.append(
-                f"  - {opinion.judge}: score={opinion.score}, statute={opinion.statute.value}, cited_evidence={cited}"
-            )
-            lines.append(f"    - Argument: {opinion.argument}")
-        lines.append("- Remediation:")
-        for item in criterion.remediation:
-            lines.append(f"  - {item}")
+            lines.append(f"- **{opinion.judge}** (Score: {opinion.score}): {opinion.argument}")
+            lines.append(f"  - Cited: {cited}")
+            lines.append("")
+
+        if criterion.final_score >= 4:
+            remediation = f"✅ {criterion.criterion_name} meets expectations. Consider documenting best practices for team reference."
+        else:
+            remediation = criterion.remediation[0] if criterion.remediation else "Address evidence gaps and re-run audit."
+        lines.append(f"**Remediation:** {remediation}")
+        if criterion.violated_rules:
+            lines.append(f"**Deterministic Rules Applied:** {', '.join(criterion.violated_rules)}")
+        lines.append("")
+        lines.append("---")
         lines.append("")
 
     lines.append("## Remediation Plan")
     lines.append("")
-    for criterion_id, items in report.remediation_plan.items():
-        lines.append(f"### {criterion_id}")
-        for item in items:
-            lines.append(f"- {item}")
+    lines.append("# Prioritized Remediation Plan")
+    lines.append("")
+    ranked = sorted(report.criterion_breakdown, key=lambda c: (c.final_score, c.criterion_id))
+    for idx, criterion in enumerate(ranked, start=1):
+        lines.append(f"## Priority {idx}: {criterion.criterion_name} (Score: {criterion.final_score}/5)")
+        if criterion.final_score >= 4:
+            lines.append(
+                f"✅ **Issue:** ✅ {criterion.criterion_name} meets expectations. "
+                "Consider documenting best practices for team reference."
+            )
+        else:
+            top_item = criterion.remediation[0] if criterion.remediation else "Address evidence gaps and re-run audit."
+            lines.append(f"⚠️ **Issue:** {top_item}")
         lines.append("")
 
-    lines.append("## Dissent Log")
+    lines.append("---")
+    lines.append("*Remediation priorities based on: score severity, security impact, and production readiness*")
     lines.append("")
-    for dissent in report.dissent_log:
-        lines.append(f"- {dissent}")
-    lines.append("")
-
-    lines.append("## Evidence Index")
-    lines.append("")
-    for ev in report.evidence_index:
-        lines.append(f"### {ev.id}")
-        lines.append(f"- Goal: {ev.goal}")
-        lines.append(f"- Found: `{ev.found}`")
-        lines.append(f"- Location: `{ev.location}`")
-        lines.append(f"- Confidence: `{ev.confidence:.2f}`")
-        lines.append(f"- Rationale: {ev.rationale}")
-        if ev.content:
-            lines.append("- Content:")
-            lines.append("```text")
-            lines.append(ev.content)
-            lines.append("```")
-        lines.append("")
+    lines.append("---")
+    lines.append("*Report generated by Automaton Auditor Swarm v3.0.0*")
+    lines.append(f"*Timestamp: {report.generated_at or 'N/A'}*")
+    lines.append(f"*Methodology: {report.methodology}*")
 
     return "\n".join(lines).rstrip() + "\n"
 

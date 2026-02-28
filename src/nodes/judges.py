@@ -60,6 +60,15 @@ def _coerce_statute(raw: str | None) -> Statute:
 def _heuristic_score(judge: JudgeName, criterion: dict, evidence: dict) -> JudicialOpinion:
     cid = criterion["id"]
     statute = _coerce_statute(criterion.get("statute"))
+    
+    # Filter evidence that might be relevant to this criterion to avoid false security overrides
+    tag_matches = [
+        k for k, v in evidence.items() 
+        if any(tag in cid.lower() for tag in v.get("tags", [])) or cid.lower() in k.lower()
+    ]
+    if not tag_matches:
+        tag_matches = [k for k in evidence.keys() if "security" not in k.lower()]
+        
     found_count = sum(1 for e in evidence.values() if e.get("found"))
     total = max(len(evidence), 1)
     confidence = found_count / total
@@ -75,12 +84,21 @@ def _heuristic_score(judge: JudgeName, criterion: dict, evidence: dict) -> Judic
         statute=statute,
         score=score,
         argument=f"{judge} heuristic opinion based on found_ratio={confidence:.2f}.",
-        cited_evidence=list(evidence.keys())[:4],
+        cited_evidence=tag_matches[:2],
     )
 
 
 def _build_judge_llm():
     provider = os.getenv("LLM_PROVIDER", "auto").lower()
+    
+    if provider in {"auto", "gemini"} and os.getenv("GEMINI_API_KEY"):
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        return ChatGoogleGenerativeAI(
+            model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
+            api_key=os.getenv("GEMINI_API_KEY"),
+            temperature=0.1,
+        )
+
     if provider in {"auto", "grok"} and os.getenv("GROK_API_KEY"):
         return ChatOpenAI(
             model=os.getenv("GROK_MODEL", "grok-2-latest"),

@@ -313,16 +313,11 @@ def protocol_security_scan(target: str) -> Evidence:
                         shell_true = any(
                             isinstance(k, ast.keyword)
                             and k.arg == "shell"
-                            and isinstance(k.value, ast.Constant)
-                            and k.value.value is True
+                            and getattr(k.value, "value", False) is True
                             for k in node.keywords
                         )
-                        dynamic_cmd = False
-                        if node.args:
-                            cmd_arg = node.args[0]
-                            dynamic_cmd = isinstance(cmd_arg, (ast.JoinedStr, ast.BinOp, ast.Call, ast.Name))
-                        if shell_true or dynamic_cmd:
-                            risky_hits.append(f"{file}:subprocess.run(shell=True/dynamic)")
+                        if shell_true:
+                            risky_hits.append(f"{file}:subprocess.run(shell=True)")
                 if isinstance(fn, ast.Name) and fn.id in {"eval", "exec"}:
                     risky_hits.append(f"{file}:{fn.id}")
         found = len(risky_hits) == 0

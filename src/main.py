@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+from datetime import datetime, timezone
 
 from dotenv import load_dotenv
 
@@ -65,6 +66,26 @@ def main() -> None:
         validate_inputs(args)
     except ValueError as exc:
         raise SystemExit(f"Input validation error: {exc}") from exc
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+
+    def _unique_path(raw_path: str) -> str:
+        base = raw_path.replace("{timestamp}", timestamp)
+        path = Path(base)
+        if "{timestamp}" not in raw_path:
+            path = path.with_name(f"{path.stem}_{timestamp}{path.suffix}")
+        if not path.exists():
+            return str(path)
+
+        idx = 2
+        while True:
+            candidate = path.with_name(f"{path.stem}_v{idx}{path.suffix}")
+            if not candidate.exists():
+                return str(candidate)
+            idx += 1
+
+    out_path = _unique_path(args.out)
+    out_json_path = _unique_path(args.out_json)
+
     app = build_graph()
     initial_state: AgentState = {
         "repo_url": args.repo,
@@ -77,18 +98,24 @@ def main() -> None:
         "audit_report": None,
         "final_report": None,
     }
-    result = app.invoke(initial_state)
+    result = app.invoke(
+        initial_state,
+        config={
+            "run_name": "AutomatonAuditorFullLoop",
+            "tags": ["auditor", "langgraph", "detectives", "judges", "chief-justice"],
+        },
+    )
     evidences = result.get("evidences", {})
     logs = result.get("logs", [])
     audit_report = result.get("audit_report")
     final_report = result.get("final_report")
 
     if final_report:
-        write_report(args.out, final_report)
+        write_report(out_path, final_report)
     else:
-        render_detective_report(args.repo, args.report, evidences, logs, args.out)
+        render_detective_report(args.repo, args.report, evidences, logs, out_path)
 
-    out_json = Path(args.out_json)
+    out_json = Path(out_json_path)
     out_json.parent.mkdir(parents=True, exist_ok=True)
     json_data = {
         "repo_url": args.repo,
@@ -100,8 +127,8 @@ def main() -> None:
         json_data["audit_report"] = audit_report.model_dump()
 
     out_json.write_text(json.dumps(json_data, indent=2), encoding="utf-8")
-    print(f"Report written to {args.out}")
-    print(f"JSON written to {args.out_json}")
+    print(f"Report written to {out_path}")
+    print(f"JSON written to {out_json_path}")
     if audit_report:
         print("\n--- CHIEF JUSTICE FINAL VERDICT ---")
         print(f"Total Score: {audit_report.aggregate_score} / 5.0")

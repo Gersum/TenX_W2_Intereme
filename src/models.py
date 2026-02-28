@@ -46,9 +46,29 @@ class CriterionBreakdown(BaseModel):
 
 
 class AuditReport(BaseModel):
+    repo_target: str = Field(default="N/A")
+    generated_at: str = Field(default="")
+    methodology: str = Field(default="Dialectical synthesis via Prosecutor/Defense/TechLead personas")
     executive_summary: str
     aggregate_score: float = Field(ge=1.0, le=5.0)
     criterion_breakdown: list[CriterionBreakdown] = Field(default_factory=list)
     remediation_plan: dict[str, list[str]] = Field(default_factory=dict)
+    evidence_index: list[Evidence] = Field(default_factory=list)
+    dissent_log: list[str] = Field(default_factory=list)
+
+
+class CriterionVerdict(BaseModel):
+    criterion_id: str
+    score: int = Field(ge=1, le=5)
+    rationale: str
+    dissent: str
+    violated_rules: list[str] = Field(default_factory=list)
+    remediation: list[str] = Field(default_factory=list)
+
+
+class FinalVerdict(BaseModel):
+    total_score: float
+    executive_summary: str
+    criteria: list[CriterionVerdict] = Field(default_factory=list)
     evidence_index: list[Evidence] = Field(default_factory=list)
     dissent_log: list[str] = Field(default_factory=list)
