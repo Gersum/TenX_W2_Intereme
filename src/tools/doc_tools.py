@@ -4,6 +4,7 @@ import base64
 import os
 import re
 import unicodedata
+from difflib import SequenceMatcher
 from pathlib import Path, PurePosixPath
 
 from langchain_core.messages import HumanMessage
@@ -52,6 +53,13 @@ def query_pdf_chunks(chunks: list[str], query: str, top_k: int = 3) -> list[str]
 
 def _normalize_cited_path(raw: str) -> str:
     token = unicodedata.normalize("NFKC", raw.strip().strip("`'\""))
+    # Common PDF extraction artifact: file path followed by prose suffix
+    # e.g. src/nodes/justice.py-dependent
+    token = re.sub(r"(\.(?:py|md|json|ya?ml|txt))(?:-[a-z][\w-]*)+", r"\1", token)
+    # Common extraction artifact: two paths fused together (e.g. src/state.py/src/graph.py)
+    fused = re.match(r"^(.*\.(?:py|md|json|ya?ml|txt))(?:/src/.*)$", token)
+    if fused:
+        token = fused.group(1)
     while token and token[-1] in ".,;:)]}":
         token = token[:-1]
     token = token.lstrip("./")
@@ -68,6 +76,41 @@ def _known_repo_dirs(known_paths: list[str]) -> set[str]:
         for i in range(1, len(parts)):
             dirs.add(str(PurePosixPath(*parts[:i])))
     return dirs
+
+
+def _exists_in_repo(path: str, repo_files: set[str], repo_dirs: set[str]) -> bool:
+    normalized = path.rstrip("/")
+    exists_as_file = normalized in repo_files
+    exists_as_dir = normalized in repo_dirs or any(item.startswith(normalized + "/") for item in repo_files)
+    return exists_as_file or exists_as_dir
+
+
+def _resolve_near_match(path: str, repo_files: set[str], repo_dirs: set[str]) -> str | None:
+    normalized = path.rstrip("/")
+
+    # Frequent style in prose: directory-like mention of module file (src/models -> src/models.py)
+    for ext in (".py", ".md", ".json", ".yaml", ".yml", ".txt"):
+        ext_candidate = normalized + ext
+        if _exists_in_repo(ext_candidate, repo_files, repo_dirs):
+            return ext_candidate
+
+    # Common singular/plural drift from extraction (tool -> tools)
+    plural_candidate = normalized + "s"
+    if _exists_in_repo(plural_candidate, repo_files, repo_dirs):
+        return plural_candidate
+
+    # Fuzzy fallback for slight OCR/wrapping corruption.
+    candidates = list(repo_files | repo_dirs)
+    best: tuple[float, str] | None = None
+    for candidate in candidates:
+        if abs(len(candidate) - len(normalized)) > 4:
+            continue
+        if not candidate.startswith(normalized[:4]) and not normalized.startswith(candidate[:4]):
+            continue
+        ratio = SequenceMatcher(None, normalized, candidate).ratio()
+        if ratio >= 0.93 and (best is None or ratio > best[0]):
+            best = (ratio, candidate)
+    return best[1] if best else None
 
 
 def protocol_citation_check(report_path: str | None, known_paths: list[str]) -> Evidence:
@@ -97,19 +140,38 @@ def protocol_citation_check(report_path: str | None, known_paths: list[str]) -> 
     chunks = ingest_pdf(str(path))
     text = "\n".join(chunks)
     cited_raw = set(re.findall(r"\b(?:src|tests|audit|reports)/[\w./-]+/?", text))
-    cited = sorted({_normalize_cited_path(item) for item in cited_raw if _normalize_cited_path(item)})
+    cited_with_flags: list[tuple[str, bool]] = []
+    for item in cited_raw:
+        normalized = _normalize_cited_path(item)
+        if not normalized:
+            continue
+        explicit_dir = item.rstrip().endswith("/")
+        cited_with_flags.append((normalized, explicit_dir))
+
+    # Deduplicate while preserving explicit-dir signal if any instance had it.
+    by_path: dict[str, bool] = {}
+    for normalized, explicit_dir in cited_with_flags:
+        by_path[normalized] = by_path.get(normalized, False) or explicit_dir
+
+    cited = sorted(by_path.items(), key=lambda pair: pair[0])
     repo_files = {_normalize_cited_path(item) for item in known_paths if _normalize_cited_path(item)}
     repo_dirs = _known_repo_dirs(list(repo_files))
 
     missing: list[str] = []
-    for cited_path in cited:
+    for cited_path, explicit_dir in cited:
         normalized = cited_path.rstrip("/")
-        exists_as_file = normalized in repo_files
-        exists_as_dir = (
-            normalized in repo_dirs
-            or any(path.startswith(normalized + "/") for path in repo_files)
-        )
-        if not (exists_as_file or exists_as_dir):
+
+        # Ignore ambiguous prose tokens that are not explicit directories and not file-like paths.
+        # Example false positives from PDF extraction: src/api, src/utils, src/n
+        leaf = PurePosixPath(normalized).name
+        has_extension = "." in leaf
+        if not explicit_dir and not has_extension:
+            continue
+
+        if _exists_in_repo(normalized, repo_files, repo_dirs):
+            continue
+        near = _resolve_near_match(normalized, repo_files, repo_dirs)
+        if near is None:
             missing.append(cited_path)
 
     found = len(missing) == 0

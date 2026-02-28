@@ -143,9 +143,31 @@ def _heuristic_score(judge: JudgeName, criterion: dict, evidence: dict) -> Judic
 
     relevant_keys = _criterion_relevant_evidence_keys(criterion, evidence)
     relevant = [evidence[k] for k in relevant_keys if k in evidence]
-    found_count = sum(1 for e in relevant if e.get("found"))
-    total = max(len(relevant), 1)
-    confidence = found_count / total
+
+    if str(cid).strip().lower() == "report_accuracy" and "doc.citation_check" in evidence:
+        citation_ev = evidence["doc.citation_check"]
+        content = str(citation_ev.get("content") or "")
+        missing_count = 0
+        if "missing=none" in content:
+            missing_count = 0
+        else:
+            payload = content.split("missing=", 1)[-1].strip() if "missing=" in content else ""
+            missing_items = [item.strip() for item in payload.split(",") if item.strip()]
+            missing_count = len(missing_items)
+
+        if missing_count == 0:
+            confidence = 1.0
+        elif missing_count == 1:
+            confidence = 0.7
+        elif missing_count <= 3:
+            confidence = 0.5
+        else:
+            confidence = 0.2
+    else:
+        found_count = sum(1 for e in relevant if e.get("found"))
+        total = max(len(relevant), 1)
+        confidence = found_count / total
+
     score = _score_from_ratio(judge, confidence)
 
     cited = sorted(

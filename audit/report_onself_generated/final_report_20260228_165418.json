@@ -1,0 +1,841 @@
+{
+  "repo_url": ".",
+  "pdf_path": "reports/final_report.pdf",
+  "evidences": {
+    "repo.state_structure": {
+      "id": "repo.state_structure",
+      "goal": "Verify typed state definitions.",
+      "found": true,
+      "content": "checked=state.py",
+      "location": "/Users/gersumasfaw/Test/src/state.py",
+      "rationale": "Typed state markers searched: TypedDict/BaseModel/Annotated.",
+      "confidence": 0.92,
+      "tags": [
+        "orchestration",
+        "state"
+      ]
+    },
+    "repo.graph_wiring": {
+      "id": "repo.graph_wiring",
+      "goal": "Verify fan-out/fan-in graph topology.",
+      "found": true,
+      "content": "edges=21, fan_out=['START', 'judicial_fanout'], fan_in=['__conditional__', 'evidence_aggregator', 'judicial_fanout', 'judicial_integrity_check']",
+      "location": "/Users/gersumasfaw/Test/src/graph.py",
+      "rationale": "AST traversal inspected edge and conditional-edge wiring with fan-out/fan-in signals.",
+      "confidence": 0.85,
+      "tags": [
+        "orchestration",
+        "parallelism"
+      ]
+    },
+    "repo.git_narrative": {
+      "id": "repo.git_narrative",
+      "goal": "Assess whether engineering happened in atomic increments.",
+      "found": true,
+      "content": "53499ff 2026-02-25T00:19:02+03:00 feat(repo-tools): add sandboxed clone, git history, and AST wiring analysis\na8e5540 2026-02-25T00:19:35+03:00 feat(doc-tools): add pdf ingestion and chunked RAG-lite queries\n360ffd7 2026-02-25T00:19:54+03:00 feat(detectives): implement RepoInvestigator, DocAnalyst, and EvidenceAggregator nodes\nd2ad827 2026-02-25T00:20:14+03:00 feat(graph): wire detective fan-out with EvidenceAggregator fan-in\na11496f 2026-02-25T00:20:36+03:00 feat(cli): add interim detective reporting workflow",
+      "location": "git log",
+      "rationale": ">=4 recent commits treated as minimal iterative signal.",
+      "confidence": 0.7,
+      "tags": [
+        "effort",
+        "process",
+        "git"
+      ]
+    },
+    "repo.security_scan": {
+      "id": "repo.security_scan",
+      "goal": "Identify risky command execution patterns.",
+      "found": true,
+      "content": "No risky patterns matched.",
+      "location": "/Users/gersumasfaw/Test",
+      "rationale": "Pattern scan for unsafe execution primitives.",
+      "confidence": 0.75,
+      "tags": [
+        "security"
+      ]
+    },
+    "repo.judicial_personas": {
+      "id": "repo.judicial_personas",
+      "goal": "Verify distinct Prosecutor/Defense/TechLead judicial personas.",
+      "found": true,
+      "content": "max_similarity=0.42, keyword_profile=True",
+      "location": "/Users/gersumasfaw/Test/src/nodes/judges.py",
+      "rationale": "Prompt distinctness and role-keyword profile were checked for persona separation.",
+      "confidence": 0.88,
+      "tags": [
+        "judicial",
+        "persona",
+        "dialectics"
+      ]
+    },
+    "repo.structured_output": {
+      "id": "repo.structured_output",
+      "goal": "Verify schema-enforced structured judge outputs.",
+      "found": true,
+      "content": "with_structured_output=True, fallback=True",
+      "location": "/Users/gersumasfaw/Test/src/nodes/judges.py",
+      "rationale": "Searched for structured-output binding and parse-failure fallback path.",
+      "confidence": 0.9,
+      "tags": [
+        "structured_output",
+        "judicial"
+      ]
+    },
+    "repo.chief_justice_rules": {
+      "id": "repo.chief_justice_rules",
+      "goal": "Verify deterministic Chief Justice synthesis rules are implemented.",
+      "found": true,
+      "content": "present_markers=functionality_weight,fact_supremacy,security_override,variance_re_evaluation,dissent",
+      "location": "/Users/gersumasfaw/Test/src/nodes/justice.py",
+      "rationale": "Static check for explicit deterministic rule markers in Chief Justice node.",
+      "confidence": 0.9,
+      "tags": [
+        "justice",
+        "synthesis",
+        "deterministic_rules"
+      ]
+    },
+    "repo.vision_implementation": {
+      "id": "repo.vision_implementation",
+      "goal": "Verify VisionInspector implementation exists and is wired.",
+      "found": true,
+      "content": "protocol=True, node=True, wiring=True",
+      "location": "/Users/gersumasfaw/Test/src/nodes/detectives.py",
+      "rationale": "Checked implementation and wiring presence for vision pipeline.",
+      "confidence": 0.9,
+      "tags": [
+        "vision",
+        "implementation"
+      ]
+    },
+    "doc.visual_audit": {
+      "id": "doc.visual_audit",
+      "goal": "Verify architectural diagrams in the report using Vision AI.",
+      "found": false,
+      "content": "status=degraded, reason=vision_quota_or_rate_limit, action=retry_later_or_upgrade_quota",
+      "location": "reports/final_report.pdf",
+      "rationale": "Vision audit degraded due to provider/API failure; pipeline continued with non-vision evidence. Raw error: Error calling model 'gemini-1.5-flash' (NOT_FOUND): 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}",
+      "confidence": 1.0,
+      "tags": [
+        "docs",
+        "vision",
+        "degraded_mode"
+      ]
+    },
+    "doc.citation_check": {
+      "id": "doc.citation_check",
+      "goal": "Cross-reference cited files against repository artifacts.",
+      "found": false,
+      "content": "missing=audit/report_onself_generated/final_report_20260228_155657.json",
+      "location": "reports/final_report.pdf",
+      "rationale": "Compared path-like citations extracted from PDF to repo file list.",
+      "confidence": 0.8,
+      "tags": [
+        "docs",
+        "hallucination"
+      ]
+    },
+    "doc.concept_verification": {
+      "id": "doc.concept_verification",
+      "goal": "Verify conceptual treatment of metacognition and dialectical synthesis.",
+      "found": true,
+      "content": "chunks=19, hits=4, metacognition=True, dialectical=True",
+      "location": "reports/final_report.pdf",
+      "rationale": "Chunked query over parsed PDF content (RAG-lite retrieval).",
+      "confidence": 0.7,
+      "tags": [
+        "docs",
+        "concept"
+      ]
+    }
+  },
+  "logs": [
+    "OrchestrationPrecheck heuristic selected doc_analyst",
+    "RepoInvestigator completed",
+    "VisionInspector completed",
+    "DocAnalyst completed",
+    "EvidenceAggregator completed: evidence_count=9, repo_evidence=True, doc_evidence=False, doc_required=True, status=incomplete",
+    "EvidenceAggregator completed: evidence_count=11, repo_evidence=True, doc_evidence=True, doc_required=True, status=ready",
+    "OrchestrationPostcheck heuristic selected judicial",
+    "JudicialFanout dispatched",
+    "OrchestrationPostcheck heuristic selected judicial",
+    "Defense completed",
+    "JudicialFanout dispatched",
+    "Prosecutor completed",
+    "TechLead completed",
+    "Defense skipped (already evaluated)",
+    "JudicialIntegrityCheck selected chief_justice: all_opinions_well_formed",
+    "Prosecutor skipped (already evaluated)",
+    "TechLead skipped (already evaluated)",
+    "Chief Justice completed",
+    "JudicialIntegrityCheck selected chief_justice: all_opinions_well_formed",
+    "Chief Justice completed"
+  ],
+  "audit_report": {
+    "repo_target": ".",
+    "generated_at": "2026-02-28T16:54:29.930885+00:00",
+    "methodology": "Dialectical synthesis via Prosecutor/Defense/TechLead personas",
+    "executive_summary": "Chief Justice synthesis completed with deterministic conflict resolution. Applied Rule of Evidence and dissent enforcement across all criteria.",
+    "aggregate_score": 3.9,
+    "criterion_breakdown": [
+      {
+        "criterion_id": "git_forensic_analysis",
+        "criterion_name": "Git Forensic Analysis",
+        "statute": "Statute of Engineering",
+        "final_score": 4,
+        "judge_opinions": [
+          {
+            "judge": "Prosecutor",
+            "criterion_id": "git_forensic_analysis",
+            "statute": "Statute of Engineering",
+            "score": 3,
+            "argument": "Prosecutor heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.git_narrative"
+            ]
+          },
+          {
+            "judge": "Defense",
+            "criterion_id": "git_forensic_analysis",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "Defense heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.git_narrative"
+            ]
+          },
+          {
+            "judge": "TechLead",
+            "criterion_id": "git_forensic_analysis",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "TechLead heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.git_narrative"
+            ]
+          }
+        ],
+        "dissent_summary": "Routine dissent summary: P/D/T = 3/5/5; final=4.",
+        "final_rationale": "Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.",
+        "violated_rules": [],
+        "remediation": [
+          "Strengthen commit hygiene: keep atomic feature commits with clear scope prefixes and rationale in commit messages.",
+          "Add a short engineering timeline section in README linking major architecture milestones to commit hashes."
+        ]
+      },
+      {
+        "criterion_id": "state_management_rigor",
+        "criterion_name": "State Management Rigor",
+        "statute": "Statute of Engineering",
+        "final_score": 4,
+        "judge_opinions": [
+          {
+            "judge": "Prosecutor",
+            "criterion_id": "state_management_rigor",
+            "statute": "Statute of Engineering",
+            "score": 3,
+            "argument": "Prosecutor heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.state_structure"
+            ]
+          },
+          {
+            "judge": "Defense",
+            "criterion_id": "state_management_rigor",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "Defense heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.state_structure"
+            ]
+          },
+          {
+            "judge": "TechLead",
+            "criterion_id": "state_management_rigor",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "TechLead heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.state_structure"
+            ]
+          }
+        ],
+        "dissent_summary": "Routine dissent summary: P/D/T = 3/5/5; final=4.",
+        "final_rationale": "Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.",
+        "violated_rules": [],
+        "remediation": [
+          "Tighten state contracts in src/state.py and src/models.py with explicit reducer semantics and field-level constraints.",
+          "Add state-concurrency tests to verify list/dict reducers preserve parallel writes without overwrite."
+        ]
+      },
+      {
+        "criterion_id": "graph_orchestration",
+        "criterion_name": "Graph Orchestration Architecture",
+        "statute": "Statute of Engineering",
+        "final_score": 4,
+        "judge_opinions": [
+          {
+            "judge": "Prosecutor",
+            "criterion_id": "graph_orchestration",
+            "statute": "Statute of Engineering",
+            "score": 3,
+            "argument": "Prosecutor heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.graph_wiring"
+            ]
+          },
+          {
+            "judge": "Defense",
+            "criterion_id": "graph_orchestration",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "Defense heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.graph_wiring"
+            ]
+          },
+          {
+            "judge": "TechLead",
+            "criterion_id": "graph_orchestration",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "TechLead heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.graph_wiring"
+            ]
+          }
+        ],
+        "dissent_summary": "Routine dissent summary: P/D/T = 3/5/5; final=4.",
+        "final_rationale": "Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.",
+        "violated_rules": [
+          "functionality_weight"
+        ],
+        "remediation": [
+          "Keep explicit fan-out/fan-in edges and conditional error branches in src/graph.py (clone_failure, missing_evidence, malformed_outputs).",
+          "Add graph execution tests that assert branch reachability and successful end-to-end compilation."
+        ]
+      },
+      {
+        "criterion_id": "safe_tool_engineering",
+        "criterion_name": "Safe Tool Engineering",
+        "statute": "Statute of Engineering",
+        "final_score": 4,
+        "judge_opinions": [
+          {
+            "judge": "Prosecutor",
+            "criterion_id": "safe_tool_engineering",
+            "statute": "Statute of Engineering",
+            "score": 3,
+            "argument": "Prosecutor heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.security_scan"
+            ]
+          },
+          {
+            "judge": "Defense",
+            "criterion_id": "safe_tool_engineering",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "Defense heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.security_scan"
+            ]
+          },
+          {
+            "judge": "TechLead",
+            "criterion_id": "safe_tool_engineering",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "TechLead heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.security_scan"
+            ]
+          }
+        ],
+        "dissent_summary": "Routine dissent summary: P/D/T = 3/5/5; final=4.",
+        "final_rationale": "Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.",
+        "violated_rules": [],
+        "remediation": [
+          "Harden tool safety in src/tools/repo_tools.py: keep sandboxed tempfile clone, check return codes, and avoid shell execution primitives.",
+          "Standardize error envelopes for subprocess and clone failures with explicit reason/action tags in Evidence content."
+        ]
+      },
+      {
+        "criterion_id": "structured_output_enforcement",
+        "criterion_name": "Structured Output Enforcement",
+        "statute": "Statute of Engineering",
+        "final_score": 4,
+        "judge_opinions": [
+          {
+            "judge": "Prosecutor",
+            "criterion_id": "structured_output_enforcement",
+            "statute": "Statute of Engineering",
+            "score": 3,
+            "argument": "Prosecutor heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.structured_output"
+            ]
+          },
+          {
+            "judge": "Defense",
+            "criterion_id": "structured_output_enforcement",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "Defense heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.structured_output"
+            ]
+          },
+          {
+            "judge": "TechLead",
+            "criterion_id": "structured_output_enforcement",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "TechLead heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.structured_output"
+            ]
+          }
+        ],
+        "dissent_summary": "Routine dissent summary: P/D/T = 3/5/5; final=4.",
+        "final_rationale": "Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.",
+        "violated_rules": [],
+        "remediation": [
+          "Enforce schema-bound judge outputs in src/nodes/judges.py with with_structured_output(JudicialOpinion) and parse-failure retries.",
+          "Log malformed output causes and fallback path selection for traceability."
+        ]
+      },
+      {
+        "criterion_id": "judicial_nuance",
+        "criterion_name": "Judicial Nuance and Dialectics",
+        "statute": "Statute of Engineering",
+        "final_score": 4,
+        "judge_opinions": [
+          {
+            "judge": "Prosecutor",
+            "criterion_id": "judicial_nuance",
+            "statute": "Statute of Engineering",
+            "score": 3,
+            "argument": "Prosecutor heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.judicial_personas"
+            ]
+          },
+          {
+            "judge": "Defense",
+            "criterion_id": "judicial_nuance",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "Defense heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.judicial_personas"
+            ]
+          },
+          {
+            "judge": "TechLead",
+            "criterion_id": "judicial_nuance",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "TechLead heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.judicial_personas"
+            ]
+          }
+        ],
+        "dissent_summary": "Routine dissent summary: P/D/T = 3/5/5; final=4.",
+        "final_rationale": "Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.",
+        "violated_rules": [],
+        "remediation": [
+          "Increase persona separation in src/nodes/judges.py by strengthening prompt distinctions and evidence-citation discipline.",
+          "Track judge disagreement metrics and flag high prompt-similarity cases to reduce persona collusion."
+        ]
+      },
+      {
+        "criterion_id": "chief_justice_synthesis",
+        "criterion_name": "Chief Justice Synthesis Engine",
+        "statute": "Statute of Engineering",
+        "final_score": 4,
+        "judge_opinions": [
+          {
+            "judge": "Prosecutor",
+            "criterion_id": "chief_justice_synthesis",
+            "statute": "Statute of Engineering",
+            "score": 3,
+            "argument": "Prosecutor heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.chief_justice_rules"
+            ]
+          },
+          {
+            "judge": "Defense",
+            "criterion_id": "chief_justice_synthesis",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "Defense heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.chief_justice_rules"
+            ]
+          },
+          {
+            "judge": "TechLead",
+            "criterion_id": "chief_justice_synthesis",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "TechLead heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.chief_justice_rules"
+            ]
+          }
+        ],
+        "dissent_summary": "Routine dissent summary: P/D/T = 3/5/5; final=4.",
+        "final_rationale": "Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.",
+        "violated_rules": [],
+        "remediation": [
+          "Expand deterministic rule traces in src/nodes/justice.py (before/after score, rule applied, and affected evidence ids per criterion).",
+          "Expose dissent rationale and rule-application summaries directly in the final report for auditability."
+        ]
+      },
+      {
+        "criterion_id": "theoretical_depth",
+        "criterion_name": "Theoretical Depth (Documentation)",
+        "statute": "Statute of Engineering",
+        "final_score": 4,
+        "judge_opinions": [
+          {
+            "judge": "Prosecutor",
+            "criterion_id": "theoretical_depth",
+            "statute": "Statute of Engineering",
+            "score": 3,
+            "argument": "Prosecutor heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "doc.concept_verification"
+            ]
+          },
+          {
+            "judge": "Defense",
+            "criterion_id": "theoretical_depth",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "Defense heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "doc.concept_verification"
+            ]
+          },
+          {
+            "judge": "TechLead",
+            "criterion_id": "theoretical_depth",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "TechLead heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "doc.concept_verification"
+            ]
+          }
+        ],
+        "dissent_summary": "Routine dissent summary: P/D/T = 3/5/5; final=4.",
+        "final_rationale": "Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.",
+        "violated_rules": [],
+        "remediation": [
+          "Deepen documentation by mapping concepts (Dialectical Synthesis, Fan-In/Fan-Out, Metacognition) to concrete modules and edges.",
+          "Add a concept-to-implementation table in reports/final_report.pdf for peer verification."
+        ]
+      },
+      {
+        "criterion_id": "report_accuracy",
+        "criterion_name": "Report Accuracy (Cross-Reference)",
+        "statute": "Statute of Engineering",
+        "final_score": 3,
+        "judge_opinions": [
+          {
+            "judge": "Prosecutor",
+            "criterion_id": "report_accuracy",
+            "statute": "Statute of Engineering",
+            "score": 2,
+            "argument": "Prosecutor heuristic opinion based on criterion_evidence_ratio=0.70 (relevant_evidence=1).",
+            "cited_evidence": [
+              "doc.citation_check"
+            ]
+          },
+          {
+            "judge": "Defense",
+            "criterion_id": "report_accuracy",
+            "statute": "Statute of Engineering",
+            "score": 4,
+            "argument": "Defense heuristic opinion based on criterion_evidence_ratio=0.70 (relevant_evidence=1).",
+            "cited_evidence": [
+              "doc.citation_check"
+            ]
+          },
+          {
+            "judge": "TechLead",
+            "criterion_id": "report_accuracy",
+            "statute": "Statute of Engineering",
+            "score": 4,
+            "argument": "TechLead heuristic opinion based on criterion_evidence_ratio=0.70 (relevant_evidence=1).",
+            "cited_evidence": [
+              "doc.citation_check"
+            ]
+          }
+        ],
+        "dissent_summary": "Routine dissent summary: P/D/T = 2/4/4; final=3.",
+        "final_rationale": "Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.",
+        "violated_rules": [
+          "fact_supremacy"
+        ],
+        "remediation": [
+          "Run citation cross-reference checks before submission and remove non-existent file claims from report narratives.",
+          "Add CI validation that all report-mentioned paths exist in the audited commit.",
+          "Align defense claims with concrete evidence ids; remove unsupported arguments from judge prompts."
+        ]
+      },
+      {
+        "criterion_id": "swarm_visual",
+        "criterion_name": "Architectural Diagram Analysis",
+        "statute": "Statute of Engineering",
+        "final_score": 4,
+        "judge_opinions": [
+          {
+            "judge": "Prosecutor",
+            "criterion_id": "swarm_visual",
+            "statute": "Statute of Engineering",
+            "score": 3,
+            "argument": "Prosecutor heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.vision_implementation"
+            ]
+          },
+          {
+            "judge": "Defense",
+            "criterion_id": "swarm_visual",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "Defense heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.vision_implementation"
+            ]
+          },
+          {
+            "judge": "TechLead",
+            "criterion_id": "swarm_visual",
+            "statute": "Statute of Engineering",
+            "score": 5,
+            "argument": "TechLead heuristic opinion based on criterion_evidence_ratio=1.00 (relevant_evidence=1).",
+            "cited_evidence": [
+              "repo.vision_implementation"
+            ]
+          }
+        ],
+        "dissent_summary": "Routine dissent summary: P/D/T = 3/5/5; final=4.",
+        "final_rationale": "Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.",
+        "violated_rules": [],
+        "remediation": [
+          "Regenerate architecture diagrams from the current compiled graph and ensure error branches are visually explicit.",
+          "Keep diagram labels synchronized with node names in src/graph.py to prevent drift."
+        ]
+      }
+    ],
+    "remediation_plan": {
+      "git_forensic_analysis": [
+        "Strengthen commit hygiene: keep atomic feature commits with clear scope prefixes and rationale in commit messages.",
+        "Add a short engineering timeline section in README linking major architecture milestones to commit hashes."
+      ],
+      "state_management_rigor": [
+        "Tighten state contracts in src/state.py and src/models.py with explicit reducer semantics and field-level constraints.",
+        "Add state-concurrency tests to verify list/dict reducers preserve parallel writes without overwrite."
+      ],
+      "graph_orchestration": [
+        "Keep explicit fan-out/fan-in edges and conditional error branches in src/graph.py (clone_failure, missing_evidence, malformed_outputs).",
+        "Add graph execution tests that assert branch reachability and successful end-to-end compilation."
+      ],
+      "safe_tool_engineering": [
+        "Harden tool safety in src/tools/repo_tools.py: keep sandboxed tempfile clone, check return codes, and avoid shell execution primitives.",
+        "Standardize error envelopes for subprocess and clone failures with explicit reason/action tags in Evidence content."
+      ],
+      "structured_output_enforcement": [
+        "Enforce schema-bound judge outputs in src/nodes/judges.py with with_structured_output(JudicialOpinion) and parse-failure retries.",
+        "Log malformed output causes and fallback path selection for traceability."
+      ],
+      "judicial_nuance": [
+        "Increase persona separation in src/nodes/judges.py by strengthening prompt distinctions and evidence-citation discipline.",
+        "Track judge disagreement metrics and flag high prompt-similarity cases to reduce persona collusion."
+      ],
+      "chief_justice_synthesis": [
+        "Expand deterministic rule traces in src/nodes/justice.py (before/after score, rule applied, and affected evidence ids per criterion).",
+        "Expose dissent rationale and rule-application summaries directly in the final report for auditability."
+      ],
+      "theoretical_depth": [
+        "Deepen documentation by mapping concepts (Dialectical Synthesis, Fan-In/Fan-Out, Metacognition) to concrete modules and edges.",
+        "Add a concept-to-implementation table in reports/final_report.pdf for peer verification."
+      ],
+      "report_accuracy": [
+        "Run citation cross-reference checks before submission and remove non-existent file claims from report narratives.",
+        "Add CI validation that all report-mentioned paths exist in the audited commit.",
+        "Align defense claims with concrete evidence ids; remove unsupported arguments from judge prompts."
+      ],
+      "swarm_visual": [
+        "Regenerate architecture diagrams from the current compiled graph and ensure error branches are visually explicit.",
+        "Keep diagram labels synchronized with node names in src/graph.py to prevent drift."
+      ]
+    },
+    "evidence_index": [
+      {
+        "id": "repo.state_structure",
+        "goal": "Verify typed state definitions.",
+        "found": true,
+        "content": "checked=state.py",
+        "location": "/Users/gersumasfaw/Test/src/state.py",
+        "rationale": "Typed state markers searched: TypedDict/BaseModel/Annotated.",
+        "confidence": 0.92,
+        "tags": [
+          "orchestration",
+          "state"
+        ]
+      },
+      {
+        "id": "repo.graph_wiring",
+        "goal": "Verify fan-out/fan-in graph topology.",
+        "found": true,
+        "content": "edges=21, fan_out=['START', 'judicial_fanout'], fan_in=['__conditional__', 'evidence_aggregator', 'judicial_fanout', 'judicial_integrity_check']",
+        "location": "/Users/gersumasfaw/Test/src/graph.py",
+        "rationale": "AST traversal inspected edge and conditional-edge wiring with fan-out/fan-in signals.",
+        "confidence": 0.85,
+        "tags": [
+          "orchestration",
+          "parallelism"
+        ]
+      },
+      {
+        "id": "repo.git_narrative",
+        "goal": "Assess whether engineering happened in atomic increments.",
+        "found": true,
+        "content": "53499ff 2026-02-25T00:19:02+03:00 feat(repo-tools): add sandboxed clone, git history, and AST wiring analysis\na8e5540 2026-02-25T00:19:35+03:00 feat(doc-tools): add pdf ingestion and chunked RAG-lite queries\n360ffd7 2026-02-25T00:19:54+03:00 feat(detectives): implement RepoInvestigator, DocAnalyst, and EvidenceAggregator nodes\nd2ad827 2026-02-25T00:20:14+03:00 feat(graph): wire detective fan-out with EvidenceAggregator fan-in\na11496f 2026-02-25T00:20:36+03:00 feat(cli): add interim detective reporting workflow",
+        "location": "git log",
+        "rationale": ">=4 recent commits treated as minimal iterative signal.",
+        "confidence": 0.7,
+        "tags": [
+          "effort",
+          "process",
+          "git"
+        ]
+      },
+      {
+        "id": "repo.security_scan",
+        "goal": "Identify risky command execution patterns.",
+        "found": true,
+        "content": "No risky patterns matched.",
+        "location": "/Users/gersumasfaw/Test",
+        "rationale": "Pattern scan for unsafe execution primitives.",
+        "confidence": 0.75,
+        "tags": [
+          "security"
+        ]
+      },
+      {
+        "id": "repo.judicial_personas",
+        "goal": "Verify distinct Prosecutor/Defense/TechLead judicial personas.",
+        "found": true,
+        "content": "max_similarity=0.42, keyword_profile=True",
+        "location": "/Users/gersumasfaw/Test/src/nodes/judges.py",
+        "rationale": "Prompt distinctness and role-keyword profile were checked for persona separation.",
+        "confidence": 0.88,
+        "tags": [
+          "judicial",
+          "persona",
+          "dialectics"
+        ]
+      },
+      {
+        "id": "repo.structured_output",
+        "goal": "Verify schema-enforced structured judge outputs.",
+        "found": true,
+        "content": "with_structured_output=True, fallback=True",
+        "location": "/Users/gersumasfaw/Test/src/nodes/judges.py",
+        "rationale": "Searched for structured-output binding and parse-failure fallback path.",
+        "confidence": 0.9,
+        "tags": [
+          "structured_output",
+          "judicial"
+        ]
+      },
+      {
+        "id": "repo.chief_justice_rules",
+        "goal": "Verify deterministic Chief Justice synthesis rules are implemented.",
+        "found": true,
+        "content": "present_markers=functionality_weight,fact_supremacy,security_override,variance_re_evaluation,dissent",
+        "location": "/Users/gersumasfaw/Test/src/nodes/justice.py",
+        "rationale": "Static check for explicit deterministic rule markers in Chief Justice node.",
+        "confidence": 0.9,
+        "tags": [
+          "justice",
+          "synthesis",
+          "deterministic_rules"
+        ]
+      },
+      {
+        "id": "repo.vision_implementation",
+        "goal": "Verify VisionInspector implementation exists and is wired.",
+        "found": true,
+        "content": "protocol=True, node=True, wiring=True",
+        "location": "/Users/gersumasfaw/Test/src/nodes/detectives.py",
+        "rationale": "Checked implementation and wiring presence for vision pipeline.",
+        "confidence": 0.9,
+        "tags": [
+          "vision",
+          "implementation"
+        ]
+      },
+      {
+        "id": "doc.visual_audit",
+        "goal": "Verify architectural diagrams in the report using Vision AI.",
+        "found": false,
+        "content": "status=degraded, reason=vision_quota_or_rate_limit, action=retry_later_or_upgrade_quota",
+        "location": "reports/final_report.pdf",
+        "rationale": "Vision audit degraded due to provider/API failure; pipeline continued with non-vision evidence. Raw error: Error calling model 'gemini-1.5-flash' (NOT_FOUND): 404 NOT_FOUND. {'error': {'code': 404, 'message': 'models/gemini-1.5-flash is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.', 'status': 'NOT_FOUND'}}",
+        "confidence": 1.0,
+        "tags": [
+          "docs",
+          "vision",
+          "degraded_mode"
+        ]
+      },
+      {
+        "id": "doc.citation_check",
+        "goal": "Cross-reference cited files against repository artifacts.",
+        "found": false,
+        "content": "missing=audit/report_onself_generated/final_report_20260228_155657.json",
+        "location": "reports/final_report.pdf",
+        "rationale": "Compared path-like citations extracted from PDF to repo file list.",
+        "confidence": 0.8,
+        "tags": [
+          "docs",
+          "hallucination"
+        ]
+      },
+      {
+        "id": "doc.concept_verification",
+        "goal": "Verify conceptual treatment of metacognition and dialectical synthesis.",
+        "found": true,
+        "content": "chunks=19, hits=4, metacognition=True, dialectical=True",
+        "location": "reports/final_report.pdf",
+        "rationale": "Chunked query over parsed PDF content (RAG-lite retrieval).",
+        "confidence": 0.7,
+        "tags": [
+          "docs",
+          "concept"
+        ]
+      }
+    ],
+    "dissent_log": [
+      "git_forensic_analysis: Routine dissent summary: P/D/T = 3/5/5; final=4.",
+      "state_management_rigor: Routine dissent summary: P/D/T = 3/5/5; final=4.",
+      "graph_orchestration: Routine dissent summary: P/D/T = 3/5/5; final=4.",
+      "safe_tool_engineering: Routine dissent summary: P/D/T = 3/5/5; final=4.",
+      "structured_output_enforcement: Routine dissent summary: P/D/T = 3/5/5; final=4.",
+      "judicial_nuance: Routine dissent summary: P/D/T = 3/5/5; final=4.",
+      "chief_justice_synthesis: Routine dissent summary: P/D/T = 3/5/5; final=4.",
+      "theoretical_depth: Routine dissent summary: P/D/T = 3/5/5; final=4.",
+      "report_accuracy: Routine dissent summary: P/D/T = 2/4/4; final=3.",
+      "swarm_visual: Routine dissent summary: P/D/T = 3/5/5; final=4."
+    ]
+  }
+}
