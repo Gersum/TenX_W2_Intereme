@@ -18,6 +18,7 @@ dependencies = [
 
 [project.scripts]
 auditor = "src.main:main"
+auditor-graph = "src.visualize_graph:main"
 
 [build-system]
 requires = ["hatchling"]

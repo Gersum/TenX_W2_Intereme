@@ -6,6 +6,11 @@ from typing import Literal
 
 from langgraph.graph import END, START, StateGraph
 
+try:
+    from langsmith import traceable
+except Exception:  # pragma: no cover - optional runtime dependency fallback
+    traceable = None
+
 from .nodes.detectives import (
     run_doc_analyst,
     run_doc_skipped,
@@ -16,8 +21,18 @@ from .nodes.detectives import (
 )
 from .nodes.judges import defense_node, prosecutor_node, tech_lead_node
 from .nodes.justice import chief_justice_node
-from .nodes.orchestration import run_orchestration_postcheck, run_orchestration_precheck
+from .nodes.orchestration import (
+    run_judicial_fanout,
+    run_orchestration_postcheck,
+    run_orchestration_precheck,
+)
 from .state import AgentState
+
+
+def _traced_node(name: str, func):
+    if traceable is None:
+        return func
+    return traceable(name=name, run_type="chain")(func)
 
 
 DEFAULT_RUBRIC = {
@@ -65,27 +80,28 @@ def _route_doc_branch(state: AgentState) -> Literal["doc_analyst", "doc_skipped"
 
 def _route_post_orchestration(
     state: AgentState,
-) -> list[Literal["prosecutor", "defense", "tech_lead"]] | Literal["missing_artifacts_handler"]:
+) -> Literal["judicial_fanout", "missing_artifacts_handler"]:
     if state.get("routing", {}).get("post_branch") == "judicial":
-        return ["prosecutor", "defense", "tech_lead"]
+        return "judicial_fanout"
     return "missing_artifacts_handler"
 
 
 def build_graph():
     builder = StateGraph(AgentState)
 
-    builder.add_node("repo_investigator", run_repo_investigator)
-    builder.add_node("orchestration_precheck", run_orchestration_precheck)
-    builder.add_node("doc_analyst", run_doc_analyst)
-    builder.add_node("doc_skipped", run_doc_skipped)
-    builder.add_node("vision_inspector", run_vision_inspector)
-    builder.add_node("evidence_aggregator", run_evidence_aggregator)
-    builder.add_node("orchestration_postcheck", run_orchestration_postcheck)
-    builder.add_node("missing_artifacts_handler", run_missing_artifacts_handler)
-    builder.add_node("prosecutor", prosecutor_node)
-    builder.add_node("defense", defense_node)
-    builder.add_node("tech_lead", tech_lead_node)
-    builder.add_node("chief_justice", chief_justice_node)
+    builder.add_node("repo_investigator", _traced_node("RepoInvestigator", run_repo_investigator))
+    builder.add_node("orchestration_precheck", _traced_node("OrchestrationPrecheck", run_orchestration_precheck))
+    builder.add_node("doc_analyst", _traced_node("DocAnalyst", run_doc_analyst))
+    builder.add_node("doc_skipped", _traced_node("DocSkipped", run_doc_skipped))
+    builder.add_node("vision_inspector", _traced_node("VisionInspector", run_vision_inspector))
+    builder.add_node("evidence_aggregator", _traced_node("EvidenceAggregator", run_evidence_aggregator))
+    builder.add_node("orchestration_postcheck", _traced_node("OrchestrationPostcheck", run_orchestration_postcheck))
+    builder.add_node("judicial_fanout", _traced_node("JudicialFanout", run_judicial_fanout))
+    builder.add_node("missing_artifacts_handler", _traced_node("MissingArtifactsHandler", run_missing_artifacts_handler))
+    builder.add_node("prosecutor", _traced_node("Prosecutor", prosecutor_node))
+    builder.add_node("defense", _traced_node("Defense", defense_node))
+    builder.add_node("tech_lead", _traced_node("TechLead", tech_lead_node))
+    builder.add_node("chief_justice", _traced_node("ChiefJustice", chief_justice_node))
 
     builder.add_edge(START, "repo_investigator")
     builder.add_edge(START, "orchestration_precheck")
@@ -99,6 +115,9 @@ def build_graph():
 
     builder.add_edge("evidence_aggregator", "orchestration_postcheck")
     builder.add_conditional_edges("orchestration_postcheck", _route_post_orchestration)
+    builder.add_edge("judicial_fanout", "prosecutor")
+    builder.add_edge("judicial_fanout", "defense")
+    builder.add_edge("judicial_fanout", "tech_lead")
 
     builder.add_edge("prosecutor", "chief_justice")
     builder.add_edge("defense", "chief_justice")

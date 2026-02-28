@@ -1,0 +1,44 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	repo_investigator(repo_investigator)
+	orchestration_precheck(orchestration_precheck)
+	doc_analyst(doc_analyst)
+	doc_skipped(doc_skipped)
+	vision_inspector(vision_inspector)
+	evidence_aggregator(evidence_aggregator)
+	orchestration_postcheck(orchestration_postcheck)
+	judicial_fanout(judicial_fanout)
+	missing_artifacts_handler(missing_artifacts_handler)
+	prosecutor(prosecutor)
+	defense(defense)
+	tech_lead(tech_lead)
+	chief_justice(chief_justice)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> orchestration_precheck;
+	__start__ --> repo_investigator;
+	__start__ --> vision_inspector;
+	defense --> chief_justice;
+	doc_analyst --> evidence_aggregator;
+	doc_skipped --> evidence_aggregator;
+	evidence_aggregator --> orchestration_postcheck;
+	judicial_fanout --> defense;
+	judicial_fanout --> prosecutor;
+	judicial_fanout --> tech_lead;
+	orchestration_postcheck -.-> judicial_fanout;
+	orchestration_postcheck -.-> missing_artifacts_handler;
+	orchestration_precheck -.-> doc_analyst;
+	orchestration_precheck -.-> doc_skipped;
+	prosecutor --> chief_justice;
+	repo_investigator --> evidence_aggregator;
+	tech_lead --> chief_justice;
+	vision_inspector --> evidence_aggregator;
+	chief_justice --> __end__;
+	missing_artifacts_handler --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc

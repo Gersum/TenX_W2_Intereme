@@ -1,0 +1,9 @@
+{
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "auditor": "src.graph:build_graph"
+  },
+  "env": ".env"
+}

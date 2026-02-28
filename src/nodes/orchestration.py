@@ -285,3 +285,7 @@ def run_orchestration_postcheck(state: AgentState) -> dict:
             "routing": {"post_branch": post_branch},
             "logs": [f"OrchestrationPostcheck fallback selected {post_branch}"],
         }
+
+
+def run_judicial_fanout(state: AgentState) -> dict:
+    return {"logs": ["JudicialFanout dispatched"]}
