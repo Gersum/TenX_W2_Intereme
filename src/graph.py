@@ -12,10 +12,13 @@ except Exception:  # pragma: no cover - optional runtime dependency fallback
     traceable = None
 
 from .nodes.detectives import (
+    run_clone_failure_handler,
     run_doc_analyst,
     run_doc_skipped,
     run_evidence_aggregator,
+    run_malformed_outputs_handler,
     run_missing_artifacts_handler,
+    run_missing_evidence_handler,
     run_repo_investigator,
     run_vision_inspector,
 )
@@ -23,6 +26,7 @@ from .nodes.judges import defense_node, prosecutor_node, tech_lead_node
 from .nodes.justice import chief_justice_node
 from .nodes.orchestration import (
     run_judicial_fanout,
+    run_judicial_integrity_check,
     run_orchestration_postcheck,
     run_orchestration_precheck,
 )
@@ -80,10 +84,19 @@ def _route_doc_branch(state: AgentState) -> Literal["doc_analyst", "doc_skipped"
 
 def _route_post_orchestration(
     state: AgentState,
-) -> Literal["judicial_fanout", "missing_artifacts_handler"]:
-    if state.get("routing", {}).get("post_branch") == "judicial":
+) -> Literal["judicial_fanout", "clone_failure_handler", "missing_evidence_handler"]:
+    branch = state.get("routing", {}).get("post_branch")
+    if branch == "judicial":
         return "judicial_fanout"
-    return "missing_artifacts_handler"
+    if branch == "clone_failure":
+        return "clone_failure_handler"
+    return "missing_evidence_handler"
+
+
+def _route_judicial_branch(state: AgentState) -> Literal["chief_justice", "malformed_outputs_handler"]:
+    if state.get("routing", {}).get("judicial_branch") == "malformed_outputs_handler":
+        return "malformed_outputs_handler"
+    return "chief_justice"
 
 
 def build_graph():
@@ -96,7 +109,11 @@ def build_graph():
     builder.add_node("vision_inspector", _traced_node("VisionInspector", run_vision_inspector))
     builder.add_node("evidence_aggregator", _traced_node("EvidenceAggregator", run_evidence_aggregator))
     builder.add_node("orchestration_postcheck", _traced_node("OrchestrationPostcheck", run_orchestration_postcheck))
+    builder.add_node("clone_failure_handler", _traced_node("CloneFailureHandler", run_clone_failure_handler))
+    builder.add_node("missing_evidence_handler", _traced_node("MissingEvidenceHandler", run_missing_evidence_handler))
     builder.add_node("judicial_fanout", _traced_node("JudicialFanout", run_judicial_fanout))
+    builder.add_node("judicial_integrity_check", _traced_node("JudicialIntegrityCheck", run_judicial_integrity_check))
+    builder.add_node("malformed_outputs_handler", _traced_node("MalformedOutputsHandler", run_malformed_outputs_handler))
     builder.add_node("missing_artifacts_handler", _traced_node("MissingArtifactsHandler", run_missing_artifacts_handler))
     builder.add_node("prosecutor", _traced_node("Prosecutor", prosecutor_node))
     builder.add_node("defense", _traced_node("Defense", defense_node))
@@ -115,13 +132,17 @@ def build_graph():
 
     builder.add_edge("evidence_aggregator", "orchestration_postcheck")
     builder.add_conditional_edges("orchestration_postcheck", _route_post_orchestration)
+    builder.add_edge("clone_failure_handler", "judicial_fanout")
+    builder.add_edge("missing_evidence_handler", "judicial_fanout")
     builder.add_edge("judicial_fanout", "prosecutor")
     builder.add_edge("judicial_fanout", "defense")
     builder.add_edge("judicial_fanout", "tech_lead")
 
-    builder.add_edge("prosecutor", "chief_justice")
-    builder.add_edge("defense", "chief_justice")
-    builder.add_edge("tech_lead", "chief_justice")
+    builder.add_edge("prosecutor", "judicial_integrity_check")
+    builder.add_edge("defense", "judicial_integrity_check")
+    builder.add_edge("tech_lead", "judicial_integrity_check")
+    builder.add_conditional_edges("judicial_integrity_check", _route_judicial_branch)
+    builder.add_edge("malformed_outputs_handler", "chief_justice")
 
     builder.add_edge("missing_artifacts_handler", END)
     builder.add_edge("chief_justice", END)

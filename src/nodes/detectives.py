@@ -94,3 +94,30 @@ def run_missing_artifacts_handler(state: AgentState) -> dict:
             "continuing with partial output for graceful degradation."
         ]
     }
+
+
+def run_clone_failure_handler(state: AgentState) -> dict:
+    return {
+        "logs": [
+            "CloneFailureHandler: repository access failed (repo_access_error detected); "
+            "continuing with degraded judicial pass for transparent reporting."
+        ]
+    }
+
+
+def run_missing_evidence_handler(state: AgentState) -> dict:
+    return {
+        "logs": [
+            "MissingEvidenceHandler: required detective evidence incomplete; "
+            "continuing to judicial pass with partial evidence."
+        ]
+    }
+
+
+def run_malformed_outputs_handler(state: AgentState) -> dict:
+    return {
+        "logs": [
+            "MalformedOutputsHandler: malformed or incomplete judicial outputs detected; "
+            "continuing to Chief Justice with deterministic fallbacks."
+        ]
+    }

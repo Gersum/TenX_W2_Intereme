@@ -19,7 +19,7 @@ class _PreRouteOut(BaseModel):
 
 
 class _PostRouteOut(BaseModel):
-    post_branch: Literal["judicial", "missing_artifacts"]
+    post_branch: Literal["judicial", "clone_failure", "missing_evidence"]
     rationale: str
 
 
@@ -72,6 +72,10 @@ def _maybe_ollama_post_route(state: AgentState) -> _PostRouteOut | None:
         return None
     has_repo = any(ev_id.startswith("repo.") and ev.found for ev_id, ev in state["evidences"].items())
     has_doc = any(ev_id.startswith("doc.") and ev.found for ev_id, ev in state["evidences"].items())
+    has_clone_failure = any(
+        ev_id.startswith("repo.") and "repo_access_error" in ev.tags
+        for ev_id, ev in state["evidences"].items()
+    )
     doc_required = bool(state.get("pdf_path"))
     summary = {
         "repo_url": state["repo_url"],
@@ -79,6 +83,7 @@ def _maybe_ollama_post_route(state: AgentState) -> _PostRouteOut | None:
         "doc_required": doc_required,
         "repo_evidence_found": has_repo,
         "doc_evidence_found": has_doc,
+        "clone_failure_detected": has_clone_failure,
         "evidence": {k: v.model_dump() for k, v in state["evidences"].items()},
     }
     base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
@@ -95,8 +100,10 @@ def _maybe_ollama_post_route(state: AgentState) -> _PostRouteOut | None:
                 "role": "user",
                 "content": (
                     f"Evidence summary:\n{json.dumps(summary)}\n\n"
-                    "Return JSON: {\"post_branch\": \"judicial\"|\"missing_artifacts\", \"rationale\": \"...\"}\n"
-                    "Choose judicial only when repo evidence is sufficient and required doc evidence is present."
+                    "Return JSON: {\"post_branch\": \"judicial\"|\"clone_failure\"|\"missing_evidence\", \"rationale\": \"...\"}\n"
+                    "Choose clone_failure if repository access/clone failed. "
+                    "Choose missing_evidence when required evidence is incomplete but clone did not fail. "
+                    "Choose judicial only when evidence is sufficient."
                 ),
             },
         ],
@@ -224,6 +231,10 @@ def run_orchestration_postcheck(state: AgentState) -> dict:
         ev_id.startswith("doc.") and ev.found
         for ev_id, ev in state["evidences"].items()
     )
+    has_clone_failure = any(
+        ev_id.startswith("repo.") and "repo_access_error" in ev.tags
+        for ev_id, ev in state["evidences"].items()
+    )
     doc_required = bool(state.get("pdf_path"))
 
     provider = os.getenv("LLM_PROVIDER", "auto").lower()
@@ -235,7 +246,12 @@ def run_orchestration_postcheck(state: AgentState) -> dict:
                 "logs": [f"OrchestrationPostcheck llm selected {ollama_out.post_branch}: {ollama_out.rationale}"],
             }
         if provider == "ollama":
-            post_branch = "judicial" if (has_repo and (has_doc or not doc_required)) else "missing_artifacts"
+            if has_clone_failure:
+                post_branch = "clone_failure"
+            elif has_repo and (has_doc or not doc_required):
+                post_branch = "judicial"
+            else:
+                post_branch = "missing_evidence"
             return {
                 "routing": {"post_branch": post_branch},
                 "logs": [f"OrchestrationPostcheck fallback selected {post_branch} (ollama unavailable)"],
@@ -243,7 +259,12 @@ def run_orchestration_postcheck(state: AgentState) -> dict:
 
     llm = _build_router_llm()
     if llm is None:
-        post_branch = "judicial" if (has_repo and (has_doc or not doc_required)) else "missing_artifacts"
+        if has_clone_failure:
+            post_branch = "clone_failure"
+        elif has_repo and (has_doc or not doc_required):
+            post_branch = "judicial"
+        else:
+            post_branch = "missing_evidence"
         return {
             "routing": {"post_branch": post_branch},
             "logs": [f"OrchestrationPostcheck heuristic selected {post_branch}"],
@@ -259,8 +280,9 @@ def run_orchestration_postcheck(state: AgentState) -> dict:
             (
                 "human",
                 "Evidence summary:\n{summary}\n\n"
-                "Choose 'judicial' only if repo evidence is sufficient and required doc evidence is present. "
-                "Otherwise choose 'missing_artifacts'.",
+                "Choose 'clone_failure' if repository access/clone failed. "
+                "Choose 'missing_evidence' when required evidence is incomplete but clone did not fail. "
+                "Choose 'judicial' only if repo evidence is sufficient and required doc evidence is present.",
             ),
         ]
     )
@@ -270,6 +292,7 @@ def run_orchestration_postcheck(state: AgentState) -> dict:
         "doc_required": doc_required,
         "repo_evidence_found": has_repo,
         "doc_evidence_found": has_doc,
+        "clone_failure_detected": has_clone_failure,
         "evidence": {k: v.model_dump() for k, v in state["evidences"].items()},
     }
     chain = prompt | structured
@@ -280,7 +303,12 @@ def run_orchestration_postcheck(state: AgentState) -> dict:
             "logs": [f"OrchestrationPostcheck llm selected {out.post_branch}: {out.rationale}"],
         }
     except Exception:
-        post_branch = "judicial" if (has_repo and (has_doc or not doc_required)) else "missing_artifacts"
+        if has_clone_failure:
+            post_branch = "clone_failure"
+        elif has_repo and (has_doc or not doc_required):
+            post_branch = "judicial"
+        else:
+            post_branch = "missing_evidence"
         return {
             "routing": {"post_branch": post_branch},
             "logs": [f"OrchestrationPostcheck fallback selected {post_branch}"],
@@ -289,3 +317,34 @@ def run_orchestration_postcheck(state: AgentState) -> dict:
 
 def run_judicial_fanout(state: AgentState) -> dict:
     return {"logs": ["JudicialFanout dispatched"]}
+
+
+def run_judicial_integrity_check(state: AgentState) -> dict:
+    criteria = state["rubric"].get("dimensions") or state["rubric"].get("criteria") or []
+    criterion_ids = {
+        str(item.get("id"))
+        for item in criteria
+        if isinstance(item, dict) and item.get("id")
+    }
+
+    malformed_reasons: list[str] = []
+    opinions = state.get("opinions", [])
+    if not criterion_ids:
+        malformed_reasons.append("rubric_missing_criteria")
+
+    for op in opinions:
+        if op.criterion_id not in criterion_ids:
+            malformed_reasons.append(f"unknown_criterion_id:{op.criterion_id}")
+        if not (1 <= op.score <= 5):
+            malformed_reasons.append(f"invalid_score:{op.judge}:{op.criterion_id}:{op.score}")
+
+    expected = len(criterion_ids) * 3 if criterion_ids else 0
+    if expected and len(opinions) < expected:
+        malformed_reasons.append(f"incomplete_judicial_output:expected={expected},actual={len(opinions)}")
+
+    branch = "malformed_outputs_handler" if malformed_reasons else "chief_justice"
+    detail = ", ".join(sorted(set(malformed_reasons))) if malformed_reasons else "all_opinions_well_formed"
+    return {
+        "routing": {"judicial_branch": branch},
+        "logs": [f"JudicialIntegrityCheck selected {branch}: {detail}"],
+    }
