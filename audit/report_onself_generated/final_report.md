@@ -1,292 +1,241 @@
-# Final Audit Report
+# Audit Report: .
 
 ## Executive Summary
 
-- Aggregate Score: `4.00 / 5.0`
-- Verdict: Chief Justice synthesis completed with deterministic conflict resolution. Applied Rule of Evidence and dissent enforcement across all criteria.
+Overall Score: 4.00/5.0. Criteria Evaluated: 10. Excellent (5): 0, Good (3-4): 10, Needs Improvement (1-2): 0. Ready for staging with minor refinements.
+
+**Overall Score:** 4.00/5.0
 
 ## Criterion Breakdown
 
-### git_forensic_analysis - Git Forensic Analysis
-- Statute: Statute of Engineering
-- Final Score: `4`
-- Final Rationale: Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.
-- Dissent Summary: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- Deterministic Rules Applied: variance_re_evaluation
-- Judge Opinions:
-  - Prosecutor: score=2, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Prosecutor heuristic opinion based on found_ratio=0.86.
-  - Defense: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Defense heuristic opinion based on found_ratio=0.86.
-  - TechLead: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: TechLead heuristic opinion based on found_ratio=0.86.
-- Remediation:
-  - Review cited evidence and improve implementation quality for this criterion.
+### Git Forensic Analysis
+**Final Score:** 4/5
 
-### state_management_rigor - State Management Rigor
-- Statute: Statute of Engineering
-- Final Score: `4`
-- Final Rationale: Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.
-- Dissent Summary: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- Deterministic Rules Applied: variance_re_evaluation
-- Judge Opinions:
-  - Prosecutor: score=2, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Prosecutor heuristic opinion based on found_ratio=0.86.
-  - Defense: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Defense heuristic opinion based on found_ratio=0.86.
-  - TechLead: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: TechLead heuristic opinion based on found_ratio=0.86.
-- Remediation:
-  - Review cited evidence and improve implementation quality for this criterion.
+**Judge Opinions:**
 
-### graph_orchestration - Graph Orchestration Architecture
-- Statute: Statute of Engineering
-- Final Score: `4`
-- Final Rationale: Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.
-- Dissent Summary: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- Deterministic Rules Applied: functionality_weight, variance_re_evaluation
-- Judge Opinions:
-  - Prosecutor: score=2, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Prosecutor heuristic opinion based on found_ratio=0.86.
-  - Defense: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Defense heuristic opinion based on found_ratio=0.86.
-  - TechLead: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: TechLead heuristic opinion based on found_ratio=0.86.
-- Remediation:
-  - Review cited evidence and improve implementation quality for this criterion.
+- **Defense** (Score: 5): Defense heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.git_narrative
 
-### safe_tool_engineering - Safe Tool Engineering
-- Statute: Statute of Engineering
-- Final Score: `4`
-- Final Rationale: Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.
-- Dissent Summary: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- Deterministic Rules Applied: variance_re_evaluation
-- Judge Opinions:
-  - Prosecutor: score=2, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Prosecutor heuristic opinion based on found_ratio=0.86.
-  - Defense: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Defense heuristic opinion based on found_ratio=0.86.
-  - TechLead: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: TechLead heuristic opinion based on found_ratio=0.86.
-- Remediation:
-  - Review cited evidence and improve implementation quality for this criterion.
+- **Prosecutor** (Score: 2): Prosecutor heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.git_narrative
 
-### structured_output_enforcement - Structured Output Enforcement
-- Statute: Statute of Engineering
-- Final Score: `4`
-- Final Rationale: Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.
-- Dissent Summary: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- Deterministic Rules Applied: variance_re_evaluation
-- Judge Opinions:
-  - Prosecutor: score=2, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Prosecutor heuristic opinion based on found_ratio=0.86.
-  - Defense: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Defense heuristic opinion based on found_ratio=0.86.
-  - TechLead: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: TechLead heuristic opinion based on found_ratio=0.86.
-- Remediation:
-  - Review cited evidence and improve implementation quality for this criterion.
+- **TechLead** (Score: 5): TechLead heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.git_narrative
 
-### judicial_nuance - Judicial Nuance and Dialectics
-- Statute: Statute of Engineering
-- Final Score: `4`
-- Final Rationale: Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.
-- Dissent Summary: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- Deterministic Rules Applied: variance_re_evaluation
-- Judge Opinions:
-  - Prosecutor: score=2, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Prosecutor heuristic opinion based on found_ratio=0.86.
-  - Defense: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Defense heuristic opinion based on found_ratio=0.86.
-  - TechLead: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: TechLead heuristic opinion based on found_ratio=0.86.
-- Remediation:
-  - Review cited evidence and improve implementation quality for this criterion.
+**Remediation:** ✅ Git Forensic Analysis meets expectations. Consider documenting best practices for team reference.
+**Deterministic Rules Applied:** variance_re_evaluation
 
-### chief_justice_synthesis - Chief Justice Synthesis Engine
-- Statute: Statute of Engineering
-- Final Score: `4`
-- Final Rationale: Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.
-- Dissent Summary: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- Deterministic Rules Applied: variance_re_evaluation
-- Judge Opinions:
-  - Prosecutor: score=2, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Prosecutor heuristic opinion based on found_ratio=0.86.
-  - Defense: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Defense heuristic opinion based on found_ratio=0.86.
-  - TechLead: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: TechLead heuristic opinion based on found_ratio=0.86.
-- Remediation:
-  - Review cited evidence and improve implementation quality for this criterion.
+---
 
-### theoretical_depth - Theoretical Depth (Documentation)
-- Statute: Statute of Engineering
-- Final Score: `4`
-- Final Rationale: Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.
-- Dissent Summary: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- Deterministic Rules Applied: variance_re_evaluation
-- Judge Opinions:
-  - Prosecutor: score=2, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Prosecutor heuristic opinion based on found_ratio=0.86.
-  - Defense: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Defense heuristic opinion based on found_ratio=0.86.
-  - TechLead: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: TechLead heuristic opinion based on found_ratio=0.86.
-- Remediation:
-  - Review cited evidence and improve implementation quality for this criterion.
+### State Management Rigor
+**Final Score:** 4/5
 
-### report_accuracy - Report Accuracy (Cross-Reference)
-- Statute: Statute of Engineering
-- Final Score: `4`
-- Final Rationale: Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.
-- Dissent Summary: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- Deterministic Rules Applied: variance_re_evaluation
-- Judge Opinions:
-  - Prosecutor: score=2, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Prosecutor heuristic opinion based on found_ratio=0.86.
-  - Defense: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Defense heuristic opinion based on found_ratio=0.86.
-  - TechLead: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: TechLead heuristic opinion based on found_ratio=0.86.
-- Remediation:
-  - Review cited evidence and improve implementation quality for this criterion.
+**Judge Opinions:**
 
-### swarm_visual - Architectural Diagram Analysis
-- Statute: Statute of Engineering
-- Final Score: `4`
-- Final Rationale: Deterministic synthesis applied with functionality weighting, evidence checks, security override, and variance re-evaluation.
-- Dissent Summary: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- Deterministic Rules Applied: variance_re_evaluation
-- Judge Opinions:
-  - Prosecutor: score=2, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Prosecutor heuristic opinion based on found_ratio=0.86.
-  - Defense: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: Defense heuristic opinion based on found_ratio=0.86.
-  - TechLead: score=5, statute=Statute of Engineering, cited_evidence=repo.state_structure, repo.graph_wiring, repo.git_narrative, repo.security_scan
-    - Argument: TechLead heuristic opinion based on found_ratio=0.86.
-- Remediation:
-  - Review cited evidence and improve implementation quality for this criterion.
+- **Defense** (Score: 5): Defense heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure
+
+- **Prosecutor** (Score: 2): Prosecutor heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure
+
+- **TechLead** (Score: 5): TechLead heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure
+
+**Remediation:** ✅ State Management Rigor meets expectations. Consider documenting best practices for team reference.
+**Deterministic Rules Applied:** variance_re_evaluation
+
+---
+
+### Graph Orchestration Architecture
+**Final Score:** 4/5
+
+**Judge Opinions:**
+
+- **Defense** (Score: 5): Defense heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **Prosecutor** (Score: 2): Prosecutor heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **TechLead** (Score: 5): TechLead heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+**Remediation:** ✅ Graph Orchestration Architecture meets expectations. Consider documenting best practices for team reference.
+**Deterministic Rules Applied:** functionality_weight, variance_re_evaluation
+
+---
+
+### Safe Tool Engineering
+**Final Score:** 4/5
+
+**Judge Opinions:**
+
+- **Defense** (Score: 5): Defense heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **Prosecutor** (Score: 2): Prosecutor heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **TechLead** (Score: 5): TechLead heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+**Remediation:** ✅ Safe Tool Engineering meets expectations. Consider documenting best practices for team reference.
+**Deterministic Rules Applied:** variance_re_evaluation
+
+---
+
+### Structured Output Enforcement
+**Final Score:** 4/5
+
+**Judge Opinions:**
+
+- **Defense** (Score: 5): Defense heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **Prosecutor** (Score: 2): Prosecutor heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **TechLead** (Score: 5): TechLead heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+**Remediation:** ✅ Structured Output Enforcement meets expectations. Consider documenting best practices for team reference.
+**Deterministic Rules Applied:** variance_re_evaluation
+
+---
+
+### Judicial Nuance and Dialectics
+**Final Score:** 4/5
+
+**Judge Opinions:**
+
+- **Defense** (Score: 5): Defense heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **Prosecutor** (Score: 2): Prosecutor heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **TechLead** (Score: 5): TechLead heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+**Remediation:** ✅ Judicial Nuance and Dialectics meets expectations. Consider documenting best practices for team reference.
+**Deterministic Rules Applied:** variance_re_evaluation
+
+---
+
+### Chief Justice Synthesis Engine
+**Final Score:** 4/5
+
+**Judge Opinions:**
+
+- **Defense** (Score: 5): Defense heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **Prosecutor** (Score: 2): Prosecutor heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **TechLead** (Score: 5): TechLead heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+**Remediation:** ✅ Chief Justice Synthesis Engine meets expectations. Consider documenting best practices for team reference.
+**Deterministic Rules Applied:** variance_re_evaluation
+
+---
+
+### Theoretical Depth (Documentation)
+**Final Score:** 4/5
+
+**Judge Opinions:**
+
+- **Defense** (Score: 5): Defense heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **Prosecutor** (Score: 2): Prosecutor heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **TechLead** (Score: 5): TechLead heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+**Remediation:** ✅ Theoretical Depth (Documentation) meets expectations. Consider documenting best practices for team reference.
+**Deterministic Rules Applied:** variance_re_evaluation
+
+---
+
+### Report Accuracy (Cross-Reference)
+**Final Score:** 4/5
+
+**Judge Opinions:**
+
+- **Defense** (Score: 5): Defense heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **Prosecutor** (Score: 2): Prosecutor heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **TechLead** (Score: 5): TechLead heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+**Remediation:** ✅ Report Accuracy (Cross-Reference) meets expectations. Consider documenting best practices for team reference.
+**Deterministic Rules Applied:** variance_re_evaluation
+
+---
+
+### Architectural Diagram Analysis
+**Final Score:** 4/5
+
+**Judge Opinions:**
+
+- **Defense** (Score: 5): Defense heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **Prosecutor** (Score: 2): Prosecutor heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+- **TechLead** (Score: 5): TechLead heuristic opinion based on found_ratio=0.86.
+  - Cited: repo.state_structure, repo.graph_wiring
+
+**Remediation:** ✅ Architectural Diagram Analysis meets expectations. Consider documenting best practices for team reference.
+**Deterministic Rules Applied:** variance_re_evaluation
+
+---
 
 ## Remediation Plan
 
-### git_forensic_analysis
-- Review cited evidence and improve implementation quality for this criterion.
+# Prioritized Remediation Plan
 
-### state_management_rigor
-- Review cited evidence and improve implementation quality for this criterion.
+## Priority 1: Chief Justice Synthesis Engine (Score: 4/5)
+✅ **Issue:** ✅ Chief Justice Synthesis Engine meets expectations. Consider documenting best practices for team reference.
 
-### graph_orchestration
-- Review cited evidence and improve implementation quality for this criterion.
+## Priority 2: Git Forensic Analysis (Score: 4/5)
+✅ **Issue:** ✅ Git Forensic Analysis meets expectations. Consider documenting best practices for team reference.
 
-### safe_tool_engineering
-- Review cited evidence and improve implementation quality for this criterion.
+## Priority 3: Graph Orchestration Architecture (Score: 4/5)
+✅ **Issue:** ✅ Graph Orchestration Architecture meets expectations. Consider documenting best practices for team reference.
 
-### structured_output_enforcement
-- Review cited evidence and improve implementation quality for this criterion.
+## Priority 4: Judicial Nuance and Dialectics (Score: 4/5)
+✅ **Issue:** ✅ Judicial Nuance and Dialectics meets expectations. Consider documenting best practices for team reference.
 
-### judicial_nuance
-- Review cited evidence and improve implementation quality for this criterion.
+## Priority 5: Report Accuracy (Cross-Reference) (Score: 4/5)
+✅ **Issue:** ✅ Report Accuracy (Cross-Reference) meets expectations. Consider documenting best practices for team reference.
 
-### chief_justice_synthesis
-- Review cited evidence and improve implementation quality for this criterion.
+## Priority 6: Safe Tool Engineering (Score: 4/5)
+✅ **Issue:** ✅ Safe Tool Engineering meets expectations. Consider documenting best practices for team reference.
 
-### theoretical_depth
-- Review cited evidence and improve implementation quality for this criterion.
+## Priority 7: State Management Rigor (Score: 4/5)
+✅ **Issue:** ✅ State Management Rigor meets expectations. Consider documenting best practices for team reference.
 
-### report_accuracy
-- Review cited evidence and improve implementation quality for this criterion.
+## Priority 8: Structured Output Enforcement (Score: 4/5)
+✅ **Issue:** ✅ Structured Output Enforcement meets expectations. Consider documenting best practices for team reference.
 
-### swarm_visual
-- Review cited evidence and improve implementation quality for this criterion.
+## Priority 9: Architectural Diagram Analysis (Score: 4/5)
+✅ **Issue:** ✅ Architectural Diagram Analysis meets expectations. Consider documenting best practices for team reference.
 
-## Dissent Log
+## Priority 10: Theoretical Depth (Documentation) (Score: 4/5)
+✅ **Issue:** ✅ Theoretical Depth (Documentation) meets expectations. Consider documenting best practices for team reference.
 
-- git_forensic_analysis: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- state_management_rigor: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- graph_orchestration: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- safe_tool_engineering: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- structured_output_enforcement: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- judicial_nuance: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- chief_justice_synthesis: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- theoretical_depth: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- report_accuracy: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
-- swarm_visual: High-variance dissent resolved by deterministic re-evaluation. Scores P/D/T = 2/5/5; final=4.
+---
+*Remediation priorities based on: score severity, security impact, and production readiness*
 
-## Evidence Index
-
-### repo.state_structure
-- Goal: Verify typed state definitions.
-- Found: `True`
-- Location: `/Users/gersumasfaw/Test/src/state.py`
-- Confidence: `0.92`
-- Rationale: Typed state markers searched: TypedDict/BaseModel/Annotated.
-- Content:
-```text
-checked=state.py
-```
-
-### repo.graph_wiring
-- Goal: Verify fan-out/fan-in graph topology.
-- Found: `True`
-- Location: `/Users/gersumasfaw/Test/src/graph.py`
-- Confidence: `0.85`
-- Rationale: AST traversal inspected edge and conditional-edge wiring with fan-out/fan-in signals.
-- Content:
-```text
-edges=15, fan_out=['START'], fan_in=['END', '__conditional__', 'chief_justice', 'evidence_aggregator']
-```
-
-### repo.git_narrative
-- Goal: Assess whether engineering happened in atomic increments.
-- Found: `True`
-- Location: `git log`
-- Confidence: `0.70`
-- Rationale: >=4 recent commits treated as minimal iterative signal.
-- Content:
-```text
-648a254 2026-02-25T00:17:48+03:00 chore: ignore local venv and python cache artifacts
-f5dd737 2026-02-25T00:18:31+03:00 chore: bootstrap uv project, env template, and run docs
-99e3652 2026-02-25T00:18:45+03:00 feat(state): add typed Evidence and JudicialOpinion with reducers
-53499ff 2026-02-25T00:19:02+03:00 feat(repo-tools): add sandboxed clone, git history, and AST wiring analysis
-a8e5540 2026-02-25T00:19:35+03:00 feat(doc-tools): add pdf ingestion and chunked RAG-lite queries
-```
-
-### repo.security_scan
-- Goal: Identify risky command execution patterns.
-- Found: `True`
-- Location: `/Users/gersumasfaw/Test`
-- Confidence: `0.75`
-- Rationale: Pattern scan for unsafe execution primitives.
-- Content:
-```text
-No risky patterns matched.
-```
-
-### doc.visual_audit
-- Goal: Verify architectural diagrams in the report using Vision AI.
-- Found: `False`
-- Location: `reports/final_report.pdf`
-- Confidence: `1.00`
-- Rationale: Vision API error: [Errno 8] nodename nor servname provided, or not known
-
-### doc.citation_check
-- Goal: Cross-reference cited files against repository artifacts.
-- Found: `True`
-- Location: `reports/final_report.pdf`
-- Confidence: `0.80`
-- Rationale: Compared path-like citations extracted from PDF to repo file list.
-- Content:
-```text
-missing=none
-```
-
-### doc.concept_verification
-- Goal: Verify conceptual treatment of metacognition and dialectical synthesis.
-- Found: `True`
-- Location: `reports/final_report.pdf`
-- Confidence: `0.70`
-- Rationale: Chunked query over parsed PDF content (RAG-lite retrieval).
-- Content:
-```text
-chunks=4, hits=4, metacognition=True, dialectical=True
-```
+---
+*Report generated by Automaton Auditor Swarm v3.0.0*
+*Timestamp: 2026-02-28T12:43:20.993628+00:00*
+*Methodology: Dialectical synthesis via Prosecutor/Defense/TechLead personas*

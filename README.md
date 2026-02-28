@@ -76,6 +76,20 @@ uv run auditor \
   --out-json audit/report_onself_generated/final_report.json
 ```
 
+Graph visualization export:
+```bash
+uv run auditor-graph
+```
+Outputs:
+- `reports/stategraph.mmd` (Mermaid source of compiled StateGraph)
+- `reports/stategraph.png` (best effort local render)
+
+LangGraph Studio:
+```bash
+langgraph dev
+```
+Uses `langgraph.json` and exposes graph `auditor`.
+
 Peer-audit:
 ```bash
 uv run auditor \
@@ -98,6 +112,7 @@ uv run auditor \
 - Locked dependencies: `uv.lock`
 - Automation helpers: `Makefile`
 - CI checks: `.github/workflows/ci.yml` (`uv sync --frozen`, lint, compile, smoke run)
+- Engineering playbook for top remediation priorities: `docs/BEST_PRACTICES.md`
 
 ## LangSmith Trace
 
@@ -109,3 +124,19 @@ export LANGCHAIN_PROJECT=automaton-auditor
 ```
 
 Then run the auditor and share the resulting trace URL in your submission.
+
+## Final Submission Quick Commands
+
+```bash
+make audit-self-final
+make graph
+make audit-peer-final REPO=https://github.com/<peer>/<repo>.git REPORT=/absolute/path/to/peer_report.pdf
+make trace-check
+```
+
+Final checks before submission:
+- `audit/report_onself_generated/final_report.md` exists and is freshly generated
+- `audit/report_onpeer_generated/final_report.md` is generated from your assigned peer repo
+- `audit/report_bypeer_received/final_report.md` contains the markdown from your peer's audit on your repo
+- `reports/final_report.pdf` is committed
+- LangSmith trace URL is included in your submission notes

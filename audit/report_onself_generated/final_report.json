@@ -19,7 +19,7 @@
       "id": "repo.graph_wiring",
       "goal": "Verify fan-out/fan-in graph topology.",
       "found": true,
-      "content": "edges=15, fan_out=['START'], fan_in=['END', '__conditional__', 'chief_justice', 'evidence_aggregator']",
+      "content": "edges=18, fan_out=['START', 'judicial_fanout'], fan_in=['END', '__conditional__', 'chief_justice', 'evidence_aggregator']",
       "location": "/Users/gersumasfaw/Test/src/graph.py",
       "rationale": "AST traversal inspected edge and conditional-edge wiring with fan-out/fan-in signals.",
       "confidence": 0.85,
@@ -102,8 +102,10 @@
     "EvidenceAggregator completed: evidence_count=5, repo_evidence=True, doc_evidence=False, doc_required=True, status=incomplete",
     "EvidenceAggregator completed: evidence_count=7, repo_evidence=True, doc_evidence=True, doc_required=True, status=ready",
     "OrchestrationPostcheck heuristic selected judicial",
-    "Defense completed",
+    "JudicialFanout dispatched",
     "OrchestrationPostcheck heuristic selected judicial",
+    "Defense completed",
+    "JudicialFanout dispatched",
     "Prosecutor completed",
     "TechLead completed",
     "Chief Justice completed",
@@ -113,6 +115,9 @@
     "Chief Justice completed"
   ],
   "audit_report": {
+    "repo_target": ".",
+    "generated_at": "2026-02-28T12:43:20.993628+00:00",
+    "methodology": "Dialectical synthesis via Prosecutor/Defense/TechLead personas",
     "executive_summary": "Chief Justice synthesis completed with deterministic conflict resolution. Applied Rule of Evidence and dissent enforcement across all criteria.",
     "aggregate_score": 4.0,
     "criterion_breakdown": [
@@ -129,10 +134,7 @@
             "score": 2,
             "argument": "Prosecutor heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
-              "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.git_narrative"
             ]
           },
           {
@@ -142,10 +144,7 @@
             "score": 5,
             "argument": "Defense heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
-              "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.git_narrative"
             ]
           },
           {
@@ -155,10 +154,7 @@
             "score": 5,
             "argument": "TechLead heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
-              "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.git_narrative"
             ]
           }
         ],
@@ -184,10 +180,7 @@
             "score": 2,
             "argument": "Prosecutor heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
-              "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.state_structure"
             ]
           },
           {
@@ -197,10 +190,7 @@
             "score": 5,
             "argument": "Defense heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
-              "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.state_structure"
             ]
           },
           {
@@ -210,10 +200,7 @@
             "score": 5,
             "argument": "TechLead heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
-              "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.state_structure"
             ]
           }
         ],
@@ -240,9 +227,7 @@
             "argument": "Prosecutor heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -253,9 +238,7 @@
             "argument": "Defense heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -266,9 +249,7 @@
             "argument": "TechLead heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           }
         ],
@@ -296,9 +277,7 @@
             "argument": "Prosecutor heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -309,9 +288,7 @@
             "argument": "Defense heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -322,9 +299,7 @@
             "argument": "TechLead heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           }
         ],
@@ -351,9 +326,7 @@
             "argument": "Prosecutor heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -364,9 +337,7 @@
             "argument": "Defense heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -377,9 +348,7 @@
             "argument": "TechLead heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           }
         ],
@@ -406,9 +375,7 @@
             "argument": "Prosecutor heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -419,9 +386,7 @@
             "argument": "Defense heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -432,9 +397,7 @@
             "argument": "TechLead heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           }
         ],
@@ -461,9 +424,7 @@
             "argument": "Prosecutor heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -474,9 +435,7 @@
             "argument": "Defense heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -487,9 +446,7 @@
             "argument": "TechLead heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           }
         ],
@@ -516,9 +473,7 @@
             "argument": "Prosecutor heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -529,9 +484,7 @@
             "argument": "Defense heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -542,9 +495,7 @@
             "argument": "TechLead heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           }
         ],
@@ -571,9 +522,7 @@
             "argument": "Prosecutor heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -584,9 +533,7 @@
             "argument": "Defense heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -597,9 +544,7 @@
             "argument": "TechLead heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           }
         ],
@@ -626,9 +571,7 @@
             "argument": "Prosecutor heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -639,9 +582,7 @@
             "argument": "Defense heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           },
           {
@@ -652,9 +593,7 @@
             "argument": "TechLead heuristic opinion based on found_ratio=0.86.",
             "cited_evidence": [
               "repo.state_structure",
-              "repo.graph_wiring",
-              "repo.git_narrative",
-              "repo.security_scan"
+              "repo.graph_wiring"
             ]
           }
         ],
@@ -718,7 +657,7 @@
         "id": "repo.graph_wiring",
         "goal": "Verify fan-out/fan-in graph topology.",
         "found": true,
-        "content": "edges=15, fan_out=['START'], fan_in=['END', '__conditional__', 'chief_justice', 'evidence_aggregator']",
+        "content": "edges=18, fan_out=['START', 'judicial_fanout'], fan_in=['END', '__conditional__', 'chief_justice', 'evidence_aggregator']",
         "location": "/Users/gersumasfaw/Test/src/graph.py",
         "rationale": "AST traversal inspected edge and conditional-edge wiring with fan-out/fan-in signals.",
         "confidence": 0.85,
