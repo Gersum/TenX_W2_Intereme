@@ -92,8 +92,14 @@ def render_audit_report_markdown(report: AuditReport) -> str:
             lines.append(f"  - Cited: {cited}")
             lines.append("")
 
-        if criterion.final_score >= 4:
-            remediation = f"✅ {criterion.criterion_name} meets expectations. Consider documenting best practices for team reference."
+        if criterion.final_score == 5:
+            remediation = "No remediation required."
+        elif criterion.final_score == 4:
+            remediation = (
+                criterion.remediation[0]
+                if criterion.remediation
+                else "Optional optimization: tighten edge-case handling and add stronger validation/tests."
+            )
         else:
             remediation = criterion.remediation[0] if criterion.remediation else "Address evidence gaps and re-run audit."
         lines.append(f"**Remediation:** {remediation}")
@@ -107,17 +113,37 @@ def render_audit_report_markdown(report: AuditReport) -> str:
     lines.append("")
     lines.append("# Prioritized Remediation Plan")
     lines.append("")
-    ranked = sorted(report.criterion_breakdown, key=lambda c: (c.final_score, c.criterion_id))
-    for idx, criterion in enumerate(ranked, start=1):
-        lines.append(f"## Priority {idx}: {criterion.criterion_name} (Score: {criterion.final_score}/5)")
-        if criterion.final_score >= 4:
-            lines.append(
-                f"✅ **Issue:** ✅ {criterion.criterion_name} meets expectations. "
-                "Consider documenting best practices for team reference."
-            )
-        else:
+
+    must_fix = sorted(
+        [c for c in report.criterion_breakdown if c.final_score <= 3],
+        key=lambda c: (c.final_score, c.criterion_id),
+    )
+    optimize = sorted(
+        [c for c in report.criterion_breakdown if c.final_score == 4],
+        key=lambda c: c.criterion_id,
+    )
+
+    if must_fix:
+        for idx, criterion in enumerate(must_fix, start=1):
+            lines.append(f"## Priority {idx}: {criterion.criterion_name} (Score: {criterion.final_score}/5)")
             top_item = criterion.remediation[0] if criterion.remediation else "Address evidence gaps and re-run audit."
             lines.append(f"⚠️ **Issue:** {top_item}")
+            lines.append("")
+    else:
+        lines.append("No blocking remediation items (all criteria scored 4/5 or above).")
+        lines.append("")
+
+    if optimize:
+        lines.append("## Optimization Backlog (Non-Blocking)")
+        lines.append("")
+        for criterion in optimize:
+            lines.append(f"- {criterion.criterion_name} (4/5):")
+            top_item = (
+                criterion.remediation[0]
+                if criterion.remediation
+                else "Optional optimization: tighten edge-case handling and add stronger validation/tests."
+            )
+            lines.append(f"  {top_item}")
         lines.append("")
 
     lines.append("---")
