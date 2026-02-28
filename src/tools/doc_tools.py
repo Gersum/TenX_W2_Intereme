@@ -3,7 +3,8 @@ from __future__ import annotations
 import base64
 import os
 import re
-from pathlib import Path
+import unicodedata
+from pathlib import Path, PurePosixPath
 
 from langchain_core.messages import HumanMessage
 from pydantic import BaseModel
@@ -49,6 +50,26 @@ def query_pdf_chunks(chunks: list[str], query: str, top_k: int = 3) -> list[str]
     return [chunk for _, chunk in scored[:top_k]]
 
 
+def _normalize_cited_path(raw: str) -> str:
+    token = unicodedata.normalize("NFKC", raw.strip().strip("`'\""))
+    while token and token[-1] in ".,;:)]}":
+        token = token[:-1]
+    token = token.lstrip("./")
+    if not token:
+        return token
+    return str(PurePosixPath(token))
+
+
+def _known_repo_dirs(known_paths: list[str]) -> set[str]:
+    dirs: set[str] = set()
+    for rel in known_paths:
+        p = PurePosixPath(rel)
+        parts = p.parts
+        for i in range(1, len(parts)):
+            dirs.add(str(PurePosixPath(*parts[:i])))
+    return dirs
+
+
 def protocol_citation_check(report_path: str | None, known_paths: list[str]) -> Evidence:
     if not report_path:
         return Evidence(
@@ -75,9 +96,22 @@ def protocol_citation_check(report_path: str | None, known_paths: list[str]) -> 
 
     chunks = ingest_pdf(str(path))
     text = "\n".join(chunks)
-    cited = set(re.findall(r"\b(?:src|tests|audit)/[\w./-]+", text))
-    repo_set = set(known_paths)
-    missing = sorted(p for p in cited if p not in repo_set)
+    cited_raw = set(re.findall(r"\b(?:src|tests|audit|reports)/[\w./-]+/?", text))
+    cited = sorted({_normalize_cited_path(item) for item in cited_raw if _normalize_cited_path(item)})
+    repo_files = {_normalize_cited_path(item) for item in known_paths if _normalize_cited_path(item)}
+    repo_dirs = _known_repo_dirs(list(repo_files))
+
+    missing: list[str] = []
+    for cited_path in cited:
+        normalized = cited_path.rstrip("/")
+        exists_as_file = normalized in repo_files
+        exists_as_dir = (
+            normalized in repo_dirs
+            or any(path.startswith(normalized + "/") for path in repo_files)
+        )
+        if not (exists_as_file or exists_as_dir):
+            missing.append(cited_path)
+
     found = len(missing) == 0
 
     return Evidence(
@@ -133,15 +167,18 @@ class _VisionOut(BaseModel):
 
 
 def protocol_visual_audit(report_path: str | None) -> Evidence:
+    goal = "Verify architectural diagrams in the report using Vision AI."
+
     if not report_path or not Path(report_path).exists():
         return Evidence(
             id="doc.visual_audit",
-            goal="Verify architectural diagrams in the report using Vision AI.",
+            goal=goal,
             found=False,
             location=report_path or "N/A",
-            rationale="No readable report supplied.",
+            content="status=skipped, reason=missing_report, action=provide_pdf_report",
+            rationale="Vision audit skipped because no readable report was supplied.",
             confidence=1.0,
-            tags=["docs", "vision"],
+            tags=["docs", "vision", "degraded_mode"],
         )
 
     try:
@@ -156,35 +193,38 @@ def protocol_visual_audit(report_path: str | None) -> Evidence:
     except Exception as e:
         return Evidence(
             id="doc.visual_audit",
-            goal="Verify architectural diagrams in the report using Vision AI.",
+            goal=goal,
             found=False,
             location=report_path,
-            rationale=f"Failed to extract images from PDF: {e}",
+            content="status=failed, reason=pdf_image_extraction_error, action=validate_pdf_integrity",
+            rationale=f"Vision audit degraded: failed to extract images from PDF ({e}).",
             confidence=1.0,
-            tags=["docs", "vision"],
+            tags=["docs", "vision", "degraded_mode"],
         )
 
     if not b64_images:
         return Evidence(
             id="doc.visual_audit",
-            goal="Verify architectural diagrams in the report using Vision AI.",
+            goal=goal,
             found=False,
             location=report_path,
-            rationale="No images extracted from the PDF to audit.",
+            content="status=skipped, reason=no_images_in_pdf, action=embed_architecture_diagram",
+            rationale="Vision audit skipped because no images were extracted from the PDF.",
             confidence=1.0,
-            tags=["docs", "vision"],
+            tags=["docs", "vision", "degraded_mode"],
         )
 
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
         return Evidence(
             id="doc.visual_audit",
-            goal="Verify architectural diagrams in the report using Vision AI.",
+            goal=goal,
             found=False,
             location=report_path,
-            rationale="GEMINI_API_KEY not configured. Vision skipped.",
+            content="status=skipped, reason=missing_gemini_api_key, action=set_GEMINI_API_KEY",
+            rationale="Vision audit degraded: GEMINI_API_KEY is not configured; continuing without vision scoring.",
             confidence=1.0,
-            tags=["docs", "vision"],
+            tags=["docs", "vision", "degraded_mode"],
         )
 
     try:
@@ -219,7 +259,7 @@ def protocol_visual_audit(report_path: str | None) -> Evidence:
 
         return Evidence(
             id="doc.visual_audit",
-            goal="Verify architectural diagrams in the report using Vision AI.",
+            goal=goal,
             found=out.architectural_match,
             content=f"images_scanned={len(b64_images)}",
             location=report_path,
@@ -228,13 +268,29 @@ def protocol_visual_audit(report_path: str | None) -> Evidence:
             tags=["docs", "vision"],
         )
     except Exception as e:
+        err = str(e).lower()
+        if any(term in err for term in ("quota", "rate", "429", "resource_exhausted")):
+            reason = "vision_quota_or_rate_limit"
+            action = "retry_later_or_upgrade_quota"
+        elif any(term in err for term in ("api key", "permission", "unauthorized", "403", "401")):
+            reason = "vision_auth_or_permission_error"
+            action = "verify_gemini_key_and_permissions"
+        elif any(term in err for term in ("resolve host", "dns", "connection", "timeout", "network")):
+            reason = "vision_network_error"
+            action = "verify_network_dns_access"
+        else:
+            reason = "vision_api_error"
+            action = "inspect_provider_logs"
         return Evidence(
             id="doc.visual_audit",
-            goal="Verify architectural diagrams in the report using Vision AI.",
+            goal=goal,
             found=False,
+            content=f"status=degraded, reason={reason}, action={action}",
             location=report_path,
-            rationale=f"Vision API error: {str(e)}",
+            rationale=(
+                "Vision audit degraded due to provider/API failure; pipeline continued with non-vision evidence. "
+                f"Raw error: {str(e)}"
+            ),
             confidence=1.0,
-            tags=["docs", "vision"],
+            tags=["docs", "vision", "degraded_mode"],
         )
-

@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 import subprocess
 import tempfile
+from difflib import SequenceMatcher
 from pathlib import Path
 
 from ..state import Evidence
@@ -330,6 +331,258 @@ def protocol_security_scan(target: str) -> Evidence:
             rationale="Pattern scan for unsafe execution primitives.",
             confidence=0.75,
             tags=["security"],
+        )
+    finally:
+        if temp_dir is not None:
+            temp_dir.cleanup()
+
+
+def _load_source(repo_path: Path, relative_path: str) -> str | None:
+    file_path = repo_path / relative_path
+    if not file_path.exists():
+        return None
+    return file_path.read_text(encoding="utf-8", errors="ignore")
+
+
+def _extract_judge_prompts(source: str) -> dict[str, str]:
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return {}
+
+    prompts: dict[str, str] = {}
+    for node in tree.body:
+        if not isinstance(node, ast.FunctionDef) or node.name != "_judge_system_prompt":
+            continue
+        for stmt in ast.walk(node):
+            if isinstance(stmt, ast.If):
+                test = stmt.test
+                if (
+                    isinstance(test, ast.Compare)
+                    and isinstance(test.left, ast.Name)
+                    and test.left.id == "judge"
+                    and len(test.comparators) == 1
+                    and isinstance(test.comparators[0], ast.Constant)
+                    and isinstance(test.comparators[0].value, str)
+                ):
+                    persona = test.comparators[0].value
+                    if stmt.body and isinstance(stmt.body[0], ast.Return):
+                        prompt = _literal_string_from_node(stmt.body[0].value)
+                        if prompt:
+                            prompts[persona] = prompt
+        # Default return (TechLead in current implementation)
+        for stmt in node.body:
+            if isinstance(stmt, ast.Return):
+                default_prompt = _literal_string_from_node(stmt.value)
+                if default_prompt:
+                    prompts.setdefault("TechLead", default_prompt)
+    return prompts
+
+
+def _literal_string_from_node(node: ast.AST | None) -> str | None:
+    if node is None:
+        return None
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if isinstance(node, ast.JoinedStr):
+        parts: list[str] = []
+        for value in node.values:
+            if isinstance(value, ast.Constant) and isinstance(value.value, str):
+                parts.append(value.value)
+        return "".join(parts) if parts else None
+    return None
+
+
+def protocol_judicial_personas(target: str) -> Evidence:
+    try:
+        repo_path, temp_dir = resolve_repo(target)
+    except Exception as exc:
+        return Evidence(
+            id="repo.judicial_personas",
+            goal="Verify distinct Prosecutor/Defense/TechLead judicial personas.",
+            found=False,
+            location=target,
+            rationale=f"Repository resolution failed: {exc}",
+            confidence=1.0,
+            tags=["judicial", "persona", "repo_access_error"],
+        )
+    try:
+        source = _load_source(repo_path, "src/nodes/judges.py")
+        if source is None:
+            return Evidence(
+                id="repo.judicial_personas",
+                goal="Verify distinct Prosecutor/Defense/TechLead judicial personas.",
+                found=False,
+                location=str(repo_path / "src/nodes/judges.py"),
+                rationale="Missing src/nodes/judges.py.",
+                confidence=0.98,
+                tags=["judicial", "persona"],
+            )
+
+        prompts = _extract_judge_prompts(source)
+        prosecutor = prompts.get("Prosecutor", "")
+        defense = prompts.get("Defense", "")
+        tech = prompts.get("TechLead", "")
+        if not (prosecutor and defense and tech):
+            return Evidence(
+                id="repo.judicial_personas",
+                goal="Verify distinct Prosecutor/Defense/TechLead judicial personas.",
+                found=False,
+                location=str(repo_path / "src/nodes/judges.py"),
+                rationale="Could not extract all three persona prompts.",
+                confidence=0.9,
+                tags=["judicial", "persona"],
+            )
+
+        p_d = SequenceMatcher(None, prosecutor, defense).ratio()
+        p_t = SequenceMatcher(None, prosecutor, tech).ratio()
+        d_t = SequenceMatcher(None, defense, tech).ratio()
+        max_similarity = max(p_d, p_t, d_t)
+
+        has_keywords = (
+            "aggressively" in prosecutor.lower()
+            and "tradeoff" in defense.lower()
+            and "maintainability" in tech.lower()
+        )
+        found = max_similarity < 0.85 and has_keywords
+        return Evidence(
+            id="repo.judicial_personas",
+            goal="Verify distinct Prosecutor/Defense/TechLead judicial personas.",
+            found=found,
+            content=f"max_similarity={max_similarity:.2f}, keyword_profile={has_keywords}",
+            location=str(repo_path / "src/nodes/judges.py"),
+            rationale="Prompt distinctness and role-keyword profile were checked for persona separation.",
+            confidence=0.88 if found else 0.8,
+            tags=["judicial", "persona", "dialectics"],
+        )
+    finally:
+        if temp_dir is not None:
+            temp_dir.cleanup()
+
+
+def protocol_structured_output_contract(target: str) -> Evidence:
+    try:
+        repo_path, temp_dir = resolve_repo(target)
+    except Exception as exc:
+        return Evidence(
+            id="repo.structured_output",
+            goal="Verify schema-enforced structured judge outputs.",
+            found=False,
+            location=target,
+            rationale=f"Repository resolution failed: {exc}",
+            confidence=1.0,
+            tags=["structured_output", "repo_access_error"],
+        )
+    try:
+        source = _load_source(repo_path, "src/nodes/judges.py")
+        if source is None:
+            return Evidence(
+                id="repo.structured_output",
+                goal="Verify schema-enforced structured judge outputs.",
+                found=False,
+                location=str(repo_path / "src/nodes/judges.py"),
+                rationale="Missing src/nodes/judges.py.",
+                confidence=0.98,
+                tags=["structured_output"],
+            )
+        has_structured = "with_structured_output(JudicialOpinion)" in source
+        has_fallback = "except Exception" in source and "_heuristic_score" in source
+        found = has_structured and has_fallback
+        return Evidence(
+            id="repo.structured_output",
+            goal="Verify schema-enforced structured judge outputs.",
+            found=found,
+            content=f"with_structured_output={has_structured}, fallback={has_fallback}",
+            location=str(repo_path / "src/nodes/judges.py"),
+            rationale="Searched for structured-output binding and parse-failure fallback path.",
+            confidence=0.9 if found else 0.82,
+            tags=["structured_output", "judicial"],
+        )
+    finally:
+        if temp_dir is not None:
+            temp_dir.cleanup()
+
+
+def protocol_chief_justice_rules(target: str) -> Evidence:
+    try:
+        repo_path, temp_dir = resolve_repo(target)
+    except Exception as exc:
+        return Evidence(
+            id="repo.chief_justice_rules",
+            goal="Verify deterministic Chief Justice synthesis rules are implemented.",
+            found=False,
+            location=target,
+            rationale=f"Repository resolution failed: {exc}",
+            confidence=1.0,
+            tags=["justice", "synthesis", "repo_access_error"],
+        )
+    try:
+        source = _load_source(repo_path, "src/nodes/justice.py")
+        if source is None:
+            return Evidence(
+                id="repo.chief_justice_rules",
+                goal="Verify deterministic Chief Justice synthesis rules are implemented.",
+                found=False,
+                location=str(repo_path / "src/nodes/justice.py"),
+                rationale="Missing src/nodes/justice.py.",
+                confidence=0.98,
+                tags=["justice", "synthesis"],
+            )
+
+        required_markers = [
+            "functionality_weight",
+            "fact_supremacy",
+            "security_override",
+            "variance_re_evaluation",
+            "dissent",
+        ]
+        present = [marker for marker in required_markers if marker in source]
+        found = len(present) >= 4
+        return Evidence(
+            id="repo.chief_justice_rules",
+            goal="Verify deterministic Chief Justice synthesis rules are implemented.",
+            found=found,
+            content=f"present_markers={','.join(present)}",
+            location=str(repo_path / "src/nodes/justice.py"),
+            rationale="Static check for explicit deterministic rule markers in Chief Justice node.",
+            confidence=0.9 if found else 0.8,
+            tags=["justice", "synthesis", "deterministic_rules"],
+        )
+    finally:
+        if temp_dir is not None:
+            temp_dir.cleanup()
+
+
+def protocol_vision_implementation(target: str) -> Evidence:
+    try:
+        repo_path, temp_dir = resolve_repo(target)
+    except Exception as exc:
+        return Evidence(
+            id="repo.vision_implementation",
+            goal="Verify VisionInspector implementation exists and is wired.",
+            found=False,
+            location=target,
+            rationale=f"Repository resolution failed: {exc}",
+            confidence=1.0,
+            tags=["vision", "implementation", "repo_access_error"],
+        )
+    try:
+        doc_tools = _load_source(repo_path, "src/tools/doc_tools.py") or ""
+        detectives = _load_source(repo_path, "src/nodes/detectives.py") or ""
+
+        has_protocol = "def protocol_visual_audit" in doc_tools
+        has_node = "def run_vision_inspector" in detectives
+        has_wiring_call = "protocol_visual_audit" in detectives
+        found = has_protocol and has_node and has_wiring_call
+        return Evidence(
+            id="repo.vision_implementation",
+            goal="Verify VisionInspector implementation exists and is wired.",
+            found=found,
+            content=f"protocol={has_protocol}, node={has_node}, wiring={has_wiring_call}",
+            location=str(repo_path / "src/nodes/detectives.py"),
+            rationale="Checked implementation and wiring presence for vision pipeline.",
+            confidence=0.9 if found else 0.82,
+            tags=["vision", "implementation"],
         )
     finally:
         if temp_dir is not None:

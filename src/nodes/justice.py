@@ -30,6 +30,67 @@ def _missing_or_unfound_citations(opinion: JudicialOpinion, state: AgentState) -
     return missing
 
 
+def _default_remediation_for_criterion(criterion_id: str, criterion_name: str) -> list[str]:
+    cid = (criterion_id or "").lower()
+    cname = (criterion_name or "").lower()
+
+    if "git_forensic" in cid or "git" in cname:
+        return [
+            "Strengthen commit hygiene: keep atomic feature commits with clear scope prefixes and rationale in commit messages.",
+            "Add a short engineering timeline section in README linking major architecture milestones to commit hashes.",
+        ]
+    if "state_management" in cid or "state" in cname:
+        return [
+            "Tighten state contracts in src/state.py and src/models.py with explicit reducer semantics and field-level constraints.",
+            "Add state-concurrency tests to verify list/dict reducers preserve parallel writes without overwrite.",
+        ]
+    if "graph_orchestration" in cid or "orchestration" in cname or "architecture" in cname:
+        return [
+            "Keep explicit fan-out/fan-in edges and conditional error branches in src/graph.py (clone_failure, missing_evidence, malformed_outputs).",
+            "Add graph execution tests that assert branch reachability and successful end-to-end compilation.",
+        ]
+    if "safe_tool" in cid or "security" in cname:
+        return [
+            "Harden tool safety in src/tools/repo_tools.py: keep sandboxed tempfile clone, check return codes, and avoid shell execution primitives.",
+            "Standardize error envelopes for subprocess and clone failures with explicit reason/action tags in Evidence content.",
+        ]
+    if "structured_output" in cid or "structured output" in cname:
+        return [
+            "Enforce schema-bound judge outputs in src/nodes/judges.py with with_structured_output(JudicialOpinion) and parse-failure retries.",
+            "Log malformed output causes and fallback path selection for traceability.",
+        ]
+    if "judicial_nuance" in cid or "dialectic" in cname or "nuance" in cname:
+        return [
+            "Increase persona separation in src/nodes/judges.py by strengthening prompt distinctions and evidence-citation discipline.",
+            "Track judge disagreement metrics and flag high prompt-similarity cases to reduce persona collusion.",
+        ]
+    if "chief_justice" in cid or "synthesis" in cname:
+        return [
+            "Expand deterministic rule traces in src/nodes/justice.py (before/after score, rule applied, and affected evidence ids per criterion).",
+            "Expose dissent rationale and rule-application summaries directly in the final report for auditability.",
+        ]
+    if "theoretical_depth" in cid or "documentation" in cname:
+        return [
+            "Deepen documentation by mapping concepts (Dialectical Synthesis, Fan-In/Fan-Out, Metacognition) to concrete modules and edges.",
+            "Add a concept-to-implementation table in reports/final_report.pdf for peer verification.",
+        ]
+    if "report_accuracy" in cid or "cross-reference" in cname:
+        return [
+            "Run citation cross-reference checks before submission and remove non-existent file claims from report narratives.",
+            "Add CI validation that all report-mentioned paths exist in the audited commit.",
+        ]
+    if "swarm_visual" in cid or "diagram" in cname or "visual" in cname:
+        return [
+            "Regenerate architecture diagrams from the current compiled graph and ensure error branches are visually explicit.",
+            "Keep diagram labels synchronized with node names in src/graph.py to prevent drift.",
+        ]
+
+    return [
+        "Review criterion evidence and align implementation with rubric success patterns.",
+        "Add targeted tests and report notes demonstrating closure of the identified gap.",
+    ]
+
+
 def chief_justice_node(state: AgentState) -> dict:
     opinions_by_criterion: dict[str, list[JudicialOpinion]] = defaultdict(list)
     for opinion in state["opinions"]:
@@ -141,9 +202,13 @@ def chief_justice_node(state: AgentState) -> dict:
             )
         dissent_log.append(f"{criterion_id}: {dissent}")
 
-        remediation = list(criterion.get("remediation_templates") or [])
+        remediation = list(
+            criterion.get("remediation_templates")
+            or criterion.get("remediation")
+            or []
+        )
         if not remediation:
-            remediation = ["Review cited evidence and improve implementation quality for this criterion."]
+            remediation = _default_remediation_for_criterion(criterion_id, criterion_name)
         if invalid_defense_citations:
             remediation.append(
                 "Align defense claims with concrete evidence ids; remove unsupported arguments from judge prompts."

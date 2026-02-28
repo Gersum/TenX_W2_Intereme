@@ -17,7 +17,6 @@ from .nodes.detectives import (
     run_doc_skipped,
     run_evidence_aggregator,
     run_malformed_outputs_handler,
-    run_missing_artifacts_handler,
     run_missing_evidence_handler,
     run_repo_investigator,
     run_vision_inspector,
@@ -114,7 +113,6 @@ def build_graph():
     builder.add_node("judicial_fanout", _traced_node("JudicialFanout", run_judicial_fanout))
     builder.add_node("judicial_integrity_check", _traced_node("JudicialIntegrityCheck", run_judicial_integrity_check))
     builder.add_node("malformed_outputs_handler", _traced_node("MalformedOutputsHandler", run_malformed_outputs_handler))
-    builder.add_node("missing_artifacts_handler", _traced_node("MissingArtifactsHandler", run_missing_artifacts_handler))
     builder.add_node("prosecutor", _traced_node("Prosecutor", prosecutor_node))
     builder.add_node("defense", _traced_node("Defense", defense_node))
     builder.add_node("tech_lead", _traced_node("TechLead", tech_lead_node))
@@ -144,6 +142,5 @@ def build_graph():
     builder.add_conditional_edges("judicial_integrity_check", _route_judicial_branch)
     builder.add_edge("malformed_outputs_handler", "chief_justice")
 
-    builder.add_edge("missing_artifacts_handler", END)
     builder.add_edge("chief_justice", END)
     return builder.compile()

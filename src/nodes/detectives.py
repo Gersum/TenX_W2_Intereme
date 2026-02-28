@@ -3,10 +3,14 @@ from __future__ import annotations
 from ..state import AgentState, Evidence
 from ..tools.doc_tools import protocol_citation_check, protocol_concept_verification, protocol_visual_audit
 from ..tools.repo_tools import (
+    protocol_chief_justice_rules,
     protocol_git_narrative,
     protocol_graph_wiring,
+    protocol_judicial_personas,
     protocol_security_scan,
+    protocol_structured_output_contract,
     protocol_state_structure,
+    protocol_vision_implementation,
     resolve_repo,
 )
 
@@ -33,6 +37,10 @@ def run_repo_investigator(state: AgentState) -> dict:
         protocol_graph_wiring,
         protocol_git_narrative,
         protocol_security_scan,
+        protocol_judicial_personas,
+        protocol_structured_output_contract,
+        protocol_chief_justice_rules,
+        protocol_vision_implementation,
     ):
         ev = protocol(state["repo_url"])
         evidences[ev.id] = ev
@@ -83,15 +91,6 @@ def run_evidence_aggregator(state: AgentState) -> dict:
                 f"EvidenceAggregator completed: evidence_count={evidence_count}, "
                 f"repo_evidence={has_repo}, doc_evidence={has_doc}, doc_required={doc_required}, status={status}"
             )
-        ]
-    }
-
-
-def run_missing_artifacts_handler(state: AgentState) -> dict:
-    return {
-        "logs": [
-            "MissingArtifactsHandler: required detective evidence was incomplete; "
-            "continuing with partial output for graceful degradation."
         ]
     }
 

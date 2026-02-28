@@ -5,6 +5,7 @@ import os
 import urllib.error
 import urllib.request
 from difflib import SequenceMatcher
+import re
 from typing import Literal
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -57,34 +58,111 @@ def _coerce_statute(raw: str | None) -> Statute:
     return Statute.ENGINEERING
 
 
+_CRITERION_EVIDENCE_HINTS: dict[str, list[str]] = {
+    "git_forensic_analysis": ["repo.git_narrative"],
+    "state_management_rigor": ["repo.state_structure"],
+    "graph_orchestration": ["repo.graph_wiring"],
+    "safe_tool_engineering": ["repo.security_scan"],
+    "structured_output_enforcement": ["repo.structured_output"],
+    "judicial_nuance": ["repo.judicial_personas"],
+    "chief_justice_synthesis": ["repo.chief_justice_rules"],
+    "theoretical_depth": ["doc.concept_verification"],
+    "report_accuracy": ["doc.citation_check"],
+    "swarm_visual": ["repo.vision_implementation"],
+}
+
+
+def _criterion_relevant_evidence_keys(criterion: dict, evidence: dict) -> list[str]:
+    cid = str(criterion.get("id", "")).strip().lower()
+    cname = str(criterion.get("name", "")).strip().lower()
+
+    hinted = [k for k in _CRITERION_EVIDENCE_HINTS.get(cid, []) if k in evidence]
+    if hinted:
+        return hinted
+
+    keywords = set(re.findall(r"[a-z0-9_]+", f"{cid} {cname}"))
+    keywords = {k for k in keywords if len(k) > 2 and k not in {"the", "and", "for"}}
+
+    synonym_map = {
+        "git": {"commit", "history"},
+        "state": {"typed", "typedict", "pydantic", "reducers"},
+        "orchestration": {"graph", "fan", "parallel", "edge"},
+        "security": {"unsafe", "sandbox", "subprocess"},
+        "documentation": {"doc", "pdf", "concept"},
+        "diagram": {"visual", "vision"},
+    }
+
+    expanded = set(keywords)
+    for kw in list(keywords):
+        expanded.update(synonym_map.get(kw, set()))
+
+    relevant: list[str] = []
+    for key, value in evidence.items():
+        tags = " ".join(value.get("tags", []))
+        haystack = f"{key} {tags} {value.get('goal', '')} {value.get('rationale', '')}".lower()
+        if any(token in haystack for token in expanded):
+            relevant.append(key)
+
+    if relevant:
+        return relevant
+
+    # Fallback to all evidence if no criterion-specific match is possible.
+    return list(evidence.keys())
+
+
+def _score_from_ratio(judge: JudgeName, ratio: float) -> int:
+    if judge == "Prosecutor":
+        if ratio >= 0.85:
+            return 3
+        if ratio >= 0.60:
+            return 2
+        return 1
+    if judge == "Defense":
+        if ratio >= 0.85:
+            return 5
+        if ratio >= 0.60:
+            return 4
+        if ratio >= 0.40:
+            return 3
+        return 2
+    # TechLead
+    if ratio >= 0.85:
+        return 5
+    if ratio >= 0.65:
+        return 4
+    if ratio >= 0.45:
+        return 3
+    if ratio >= 0.25:
+        return 2
+    return 1
+
+
 def _heuristic_score(judge: JudgeName, criterion: dict, evidence: dict) -> JudicialOpinion:
     cid = criterion["id"]
     statute = _coerce_statute(criterion.get("statute"))
-    
-    # Filter evidence that might be relevant to this criterion to avoid false security overrides
-    tag_matches = [
-        k for k, v in evidence.items() 
-        if any(tag in cid.lower() for tag in v.get("tags", [])) or cid.lower() in k.lower()
-    ]
-    if not tag_matches:
-        tag_matches = [k for k in evidence.keys() if "security" not in k.lower()]
-        
-    found_count = sum(1 for e in evidence.values() if e.get("found"))
-    total = max(len(evidence), 1)
+
+    relevant_keys = _criterion_relevant_evidence_keys(criterion, evidence)
+    relevant = [evidence[k] for k in relevant_keys if k in evidence]
+    found_count = sum(1 for e in relevant if e.get("found"))
+    total = max(len(relevant), 1)
     confidence = found_count / total
-    if judge == "Prosecutor":
-        score = 2 if confidence > 0.7 else 1
-    elif judge == "Defense":
-        score = 5 if confidence > 0.5 else 4
-    else:
-        score = 5 if confidence > 0.8 else 3 if confidence > 0.4 else 1
+    score = _score_from_ratio(judge, confidence)
+
+    cited = sorted(
+        relevant_keys,
+        key=lambda key: 0 if evidence.get(key, {}).get("found") else 1,
+    )[:2]
+
     return JudicialOpinion(
         judge=judge,
         criterion_id=cid,
         statute=statute,
         score=score,
-        argument=f"{judge} heuristic opinion based on found_ratio={confidence:.2f}.",
-        cited_evidence=tag_matches[:2],
+        argument=(
+            f"{judge} heuristic opinion based on criterion_evidence_ratio={confidence:.2f} "
+            f"(relevant_evidence={len(relevant)})."
+        ),
+        cited_evidence=cited,
     )
 
 
